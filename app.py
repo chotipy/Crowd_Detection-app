@@ -308,7 +308,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 0.500em;
+        font-size: 1em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
