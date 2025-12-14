@@ -354,7 +354,7 @@ st.markdown(
     div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
         font-size: 2.5rem;
         font-weight: 700;
-        color: {text_color};
+        color: {sidebar_bg};
     }}
 
     /* Title Styling */
