@@ -300,7 +300,7 @@ st.markdown(
 
     section[data-testid="stSidebar"] h2 {{
         font-size: 1em;
-        font-weight: 600;
+        font-weight: 1.5em;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: {text_secondary};
@@ -308,7 +308,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 0.875em;
+        font-size: 0.500em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -317,7 +317,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] label {{
-        font-size: 0.5em;
+        font-size: 0.500em;
         font-weight: 500;
         color: {text_color};
     }}
@@ -346,7 +346,7 @@ st.markdown(
     div[data-testid="stMetric"] label {{
         font-size: 0.875rem;
         font-weight: 500;
-        color: {accent_color};
+        color: {text_secondary};
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }}
