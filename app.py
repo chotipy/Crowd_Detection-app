@@ -115,7 +115,7 @@ with col2:
 
 st.sidebar.divider()
 
-st.sidebar.subtitle("🛠 Preprocessing")
+st.sidebar.subheader("🛠 Preprocessing")
 st.sidebar.header("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
@@ -135,7 +135,7 @@ blur_k = st.sidebar.selectbox(
 )  # Untuk reduce noise di low light karena indoor
 
 st.sidebar.divider()
-st.sidebar.subtitle("⚙️ Inference Settings")
+st.sidebar.subheader("⚙️ Inference Settings")
 st.sidebar.header(
     "Adjust how the model detects people\n"
     "These settings affect accuracy, speed, and noise reduction"
