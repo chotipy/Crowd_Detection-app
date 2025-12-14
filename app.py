@@ -116,7 +116,7 @@ with col2:
 st.sidebar.divider()
 
 st.sidebar.header("🛠 Preprocessing")
-st.sidebar.write("Please enable the preprocessing tick for better experience!")
+st.sidebar.caption("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
     "Gamma Correction",
