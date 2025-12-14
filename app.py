@@ -422,7 +422,7 @@ st.markdown(
 
     /* File Uploader */
     div[data-testid="stFileUploader"] {{
-        background: {text_color};
+        background: {card_bg};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
         border: 2px dashed {border_color};
@@ -432,7 +432,7 @@ st.markdown(
     div[data-testid="stFileUploader"] label {{
         font-size: 0.875rem;
         font-weight: 500;
-        color: {text_secondary};
+        color: {text_color};
     }}
 
     /* Success Message */
