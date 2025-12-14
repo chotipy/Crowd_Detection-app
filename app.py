@@ -1,9 +1,11 @@
 import streamlit as st
+import os
+
+os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 import cv2
 import numpy as np
 from ultralytics import YOLO
 import tempfile
-import os
 from datetime import datetime
 
 # CONFIG
