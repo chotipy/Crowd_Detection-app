@@ -299,7 +299,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h2 {{
-        font-size: 1em;
+        font-size: 0.750em;
         font-weight: 1.5em;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -308,7 +308,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 1em;
+        font-size: 1.5em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
