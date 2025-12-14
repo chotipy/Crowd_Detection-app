@@ -432,7 +432,7 @@ st.markdown(
     div[data-testid="stFileUploader"] label {{
         font-size: 0.875rem;
         font-weight: 500;
-        color: {text_color};
+        color: {text_secondary};
     }}
 
     /* Success Message */
