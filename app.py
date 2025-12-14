@@ -16,61 +16,210 @@ theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
 
 # THEME STYLING
 if theme_mode == "Light":
-    bg_gradient = "rgba(189,212,231,0.35), rgba(170,185,207,0.35)"
-    sidebar_bg = "rgba(134,147,171,0.45)"
-    text_color = "#212227"
+    bg_color = "#f8f9fa"
+    card_bg = "rgba(255, 255, 255, 0.7)"
+    sidebar_bg = "rgba(255, 255, 255, 0.85)"
+    text_color = "#1a1a1a"
+    text_secondary = "#6c757d"
+    border_color = "rgba(0, 0, 0, 0.08)"
+    shadow = "0 8px 32px rgba(0, 0, 0, 0.08)"
 else:
-    bg_gradient = "rgba(33,34,39,0.85), rgba(33,34,39,0.85)"
-    sidebar_bg = "rgba(33,34,39,0.95)"
+    bg_color = "#0f1419"
+    card_bg = "rgba(30, 35, 45, 0.7)"
+    sidebar_bg = "rgba(20, 25, 35, 0.85)"
     text_color = "#ffffff"
+    text_secondary = "#a0a0a0"
+    border_color = "rgba(255, 255, 255, 0.08)"
+    shadow = "0 8px 32px rgba(0, 0, 0, 0.3)"
 
 st.markdown(
     f"""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {{
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }}
+    
     .stApp {{
-        background: linear-gradient(135deg, {bg_gradient});
-        font-family: "Segoe UI", sans-serif;
+        background: {bg_color};
         color: {text_color};
     }}
 
+    /* Sidebar Styling */
     section[data-testid="stSidebar"] {{
         background: {sidebar_bg};
-        color: white;
+        backdrop-filter: blur(20px);
+        border-right: 1px solid {border_color};
     }}
 
-    section[data-testid="stSidebar"] * {{
-        color: white !important;
+    section[data-testid="stSidebar"] > div {{
+        padding: 2rem 1.5rem;
     }}
 
-    div[data-testid="stMetric"],
-    div[data-testid="stImage"],
-    div[data-testid="stVerticalBlock"] > div {{
-        background: rgba(255,255,255,0.35);
-        backdrop-filter: blur(12px);
-        border-radius: 0.25rem;
-        border: 1px solid rgba(255,255,255,0.25);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    }}
-
-    .badge {{
-        padding: 6px 12px;
-        border-radius: 0.25rem;
+    section[data-testid="stSidebar"] h2 {{
+        font-size: 0.875rem;
         font-weight: 600;
-        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: {text_secondary};
+        margin-bottom: 1rem;
     }}
 
-    .low {{ background: #4CAF50; color: white; }}
-    .mid {{ background: #FFC107; color: black; }}
-    .high {{ background: #F44336; color: white; }}
+    section[data-testid="stSidebar"] label {{
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: {text_color};
+    }}
 
+    /* Card Styling */
+    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stImage"]),
+    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stMetric"]) {{
+        background: {card_bg};
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        border: 1px solid {border_color};
+        box-shadow: {shadow};
+        padding: 1.5rem;
+        margin: 0.5rem 0;
+    }}
+
+    /* Metric Styling */
+    div[data-testid="stMetric"] {{
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }}
+
+    div[data-testid="stMetric"] label {{
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: {text_secondary};
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }}
+
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: {text_color};
+    }}
+
+    /* Title Styling */
+    h1 {{
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: {text_color};
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }}
+
+    p, .stMarkdown p {{
+        font-size: 1rem;
+        color: {text_secondary};
+        line-height: 1.6;
+    }}
+
+    /* Badge Styling */
+    .badge {{
+        padding: 0.5rem 1.25rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 1rem;
+    }}
+
+    .low {{ 
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }}
+    
+    .mid {{ 
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }}
+    
+    .high {{ 
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }}
+
+    /* Button Styling */
+    .stButton > button {{
+        background: {card_bg};
+        backdrop-filter: blur(20px);
+        border: 1px solid {border_color};
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: {text_color};
+        transition: all 0.2s ease;
+    }}
+
+    .stButton > button:hover {{
+        transform: translateY(-2px);
+        box-shadow: {shadow};
+    }}
+
+    /* File Uploader */
+    div[data-testid="stFileUploader"] {{
+        background: {card_bg};
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        border: 2px dashed {border_color};
+        padding: 2rem;
+    }}
+
+    div[data-testid="stFileUploader"] label {{
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: {text_color};
+    }}
+
+    /* Success Message */
+    .stSuccess {{
+        background: {card_bg};
+        backdrop-filter: blur(20px);
+        border-radius: 0.75rem;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 1rem;
+        font-size: 0.875rem;
+    }}
+
+    /* Caption */
+    .stCaption {{
+        font-size: 0.75rem;
+        color: {text_secondary};
+        text-align: center;
+        margin-top: 2rem;
+    }}
+
+    /* Divider */
+    hr {{
+        margin: 2rem 0;
+        border: none;
+        border-top: 1px solid {border_color};
+    }}
+
+    /* Hide Streamlit branding */
     footer {{ visibility: hidden; }}
+    #MainMenu {{ visibility: hidden; }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 # HEADER
-st.title("Crowd Detection & Crowd Level Classification")
+st.title("Crowd Detection & Classification")
 st.write(
     "YOLOv8-based crowd detection system for indoor CCTV with customizable "
     "inference and preprocessing parameters."
@@ -180,7 +329,7 @@ if input_type == "Image":
             )
 
         path = save_screenshot(output, "image")
-        st.success(f"Your screenshot is successfully saved as: {path}")
+        st.success(f"Screenshot saved: {path}")
 
 # VIDEO MODE
 else:
@@ -224,7 +373,7 @@ else:
 
         if last_frame is not None:
             path = save_screenshot(last_frame, "video")
-            st.success(f"Your screenshot is successfully saved as: {path}")
+            st.success(f"Screenshot saved: {path}")
 
 # FOOTER
 st.markdown("---")
