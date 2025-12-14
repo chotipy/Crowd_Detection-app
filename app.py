@@ -299,7 +299,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h2 {{
-        font-size: 0.750em;
+        font-size: 0.0em;
         font-weight: 1.5em;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -308,7 +308,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 1em;
+        font-size: 1.2em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -422,7 +422,7 @@ st.markdown(
 
     /* File Uploader */
     div[data-testid="stFileUploader"] {{
-        background: {bg_color};
+        background: {text_color};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
         border: 2px dashed {border_color};
