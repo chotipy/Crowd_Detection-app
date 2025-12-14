@@ -12,6 +12,209 @@ from datetime import datetime
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
 theme_mode = "Light"
 
+# HEADER
+st.markdown(
+    '<h1 align="Crowd Detection and Classification</h1>', unsafe_allow_html=True
+)
+st.write(
+    "a YOLOv8-based crowd detection system for indoor CCTV with customizable "
+    "Inference and Preprocessing Parameters"
+)
+
+
+# LOAD MODEL
+@st.cache_resource
+def load_model():
+    return YOLO(os.path.join("model", "best.pt"))
+
+
+model = load_model()
+
+
+# PREPROCESSING
+def gamma_correction(image, gamma):  # Mencerahkan gambar yang gelap
+    inv = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv) * 255 for i in range(256)]).astype("uint8")
+    return cv2.LUT(image, table)
+
+
+# CALL PREPROCESSING
+def preprocess_frame(frame, enable, gamma, blur_k):
+    if not enable:
+        return frame
+    frame = gamma_correction(frame, gamma)
+    frame = cv2.GaussianBlur(
+        frame, (blur_k, blur_k), 1.0
+    )  # Mengurangi noise karena kita pakai lighting indoor
+    return frame
+
+
+# UTILS
+def classify_crowd(count):  # Mapping jumlah orang
+    if count <= 3:
+        return "Sedikit", "low"
+    elif count <= 30:
+        return "Sedang", "mid"
+    else:
+        return "Ramai", "high"
+
+
+def draw_boxes(image, results, conf):  # Output kotak pada image
+    count = 0
+    for box in results.boxes:
+        if int(box.cls[0]) == 0 and float(box.conf[0]) >= conf:
+            count += 1
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            cv2.rectangle(image, (x1, y1), (x2, y2), (99, 112, 116), 2)
+    return image, count
+
+
+def save_screenshot(image, prefix):  # Save screenshot
+    os.makedirs("screenshots", exist_ok=True)
+    filename = f"screenshots/{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    cv2.imwrite(filename, image)
+    return filename
+
+
+# SIDEBAR
+st.sidebar.header("🎛️ Application Demo")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    theme_mode = st.radio("Theme", ["Light", "Dark"], index=0)
+with col2:
+    input_type = st.radio("Input", ["Image", "Video"], index=0)
+
+st.sidebar.divider()
+
+st.sidebar.header("🛠 Preprocessing")
+enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
+gamma_val = st.sidebar.slider(
+    "Gamma Correction",
+    min_value=0.8,
+    max_value=1.6,
+    value=1.2,
+    step=0.1,
+    help="Increase gamma to brighten low-light indoor CCTV images",
+)  # Untuk mengatur seberapa cerah gambar
+
+blur_k = st.sidebar.selectbox(
+    "Gaussian Blur Kernel",
+    [3, 5, 7],
+    index=1,
+    help=("To reduce noise in low light circumstances"),
+)  # Untuk reduce noise di low light karena indoor
+
+st.sidebar.header("⚙️ Inference Settings")
+st.sidebar.caption(
+    "Adjust how the model detects people\n"
+    "These settings affect accuracy, speed, and noise reduction"
+)
+conf_thres = st.sidebar.slider(
+    "Confidence Threshold",
+    min_value=0.1,
+    max_value=0.9,
+    value=0.5,
+    step=0.05,
+    help=(
+        "Minimum confidence score required to display a detection\n"
+        "Low value = more detections but may include false positives\n"
+        "High value = fewer but usually more reliable detections"
+    ),
+)  # Atur sensitivitas detection
+
+iou_thres = st.sidebar.slider(
+    "IoU Threshold",
+    min_value=0.3,
+    max_value=0.8,
+    value=0.6,
+    step=0.05,
+    help=(
+        "Controls how overlapping bounding boxes are merged\n"
+        "Lower IoU = stricter suppression\n"
+        "Higher IoU = allows more overlapping boxes"
+    ),
+)  # Atur overlap antar bounding box
+
+max_det = st.sidebar.slider(
+    "Max Detections",
+    10,
+    500,
+    300,
+    50,
+    help=("Maximum of object that you want to detect?"),
+)  # Batas maksimum objek yang dapat terdeteksi
+
+# IMAGE MODE
+if input_type == "Image":
+    file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
+    if file:
+        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+        frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
+
+        results = model.predict(
+            frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
+        )[0]
+
+        output, count = draw_boxes(frame.copy(), results, conf_thres)
+        label, badge = classify_crowd(count)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(output, channels="BGR")
+        with col2:
+            st.metric("People Count", count)
+            st.markdown(
+                f'<span class="badge {badge}">{label}</span>', unsafe_allow_html=True
+            )
+
+        path = save_screenshot(output, "image")
+        st.success(f"Screenshot saved: {path}")
+
+# VIDEO MODE
+else:
+    vid = st.file_uploader("Upload Video", ["mp4", "avi", "mov"])
+    if vid:
+        tfile = tempfile.NamedTemporaryFile(delete=False)
+        tfile.write(vid.read())
+
+        cap = cv2.VideoCapture(tfile.name)
+        stframe = st.empty()
+        last_frame = None
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
+            results = model.predict(
+                frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
+            )[0]
+
+            output, count = draw_boxes(frame.copy(), results, conf_thres)
+            label, _ = classify_crowd(count)
+            last_frame = output.copy()
+
+            cv2.putText(
+                output,
+                f"People: {count} | Crowd: {label}",
+                (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                2,
+            )
+
+            stframe.image(output, channels="BGR")
+
+        cap.release()
+        os.remove(tfile.name)
+
+        if last_frame is not None:
+            path = save_screenshot(last_frame, "video")
+            st.success(f"Screenshot saved: {path}")
+
+
 # THEME STYLING
 if theme_mode == "Light":
     bg_color = "#f6eef4"
@@ -217,209 +420,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-
-# HEADER
-st.markdown(
-    '<h1 align="Crowd Detection and Classification</h1>', unsafe_allow_html=True
-)
-st.write(
-    "a YOLOv8-based crowd detection system for indoor CCTV with customizable "
-    "Inference and Preprocessing Parameters"
-)
-
-
-# LOAD MODEL
-@st.cache_resource
-def load_model():
-    return YOLO(os.path.join("model", "best.pt"))
-
-
-model = load_model()
-
-
-# PREPROCESSING
-def gamma_correction(image, gamma):  # Mencerahkan gambar yang gelap
-    inv = 1.0 / gamma
-    table = np.array([((i / 255.0) ** inv) * 255 for i in range(256)]).astype("uint8")
-    return cv2.LUT(image, table)
-
-
-# CALL PREPROCESSING
-def preprocess_frame(frame, enable, gamma, blur_k):
-    if not enable:
-        return frame
-    frame = gamma_correction(frame, gamma)
-    frame = cv2.GaussianBlur(
-        frame, (blur_k, blur_k), 1.0
-    )  # Mengurangi noise karena kita pakai lighting indoor
-    return frame
-
-
-# UTILS
-def classify_crowd(count):  # Mapping jumlah orang
-    if count <= 3:
-        return "Sedikit", "low"
-    elif count <= 30:
-        return "Sedang", "mid"
-    else:
-        return "Ramai", "high"
-
-
-def draw_boxes(image, results, conf):  # Output kotak pada image
-    count = 0
-    for box in results.boxes:
-        if int(box.cls[0]) == 0 and float(box.conf[0]) >= conf:
-            count += 1
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            cv2.rectangle(image, (x1, y1), (x2, y2), (99, 112, 116), 2)
-    return image, count
-
-
-def save_screenshot(image, prefix):  # Save screenshot
-    os.makedirs("screenshots", exist_ok=True)
-    filename = f"screenshots/{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    cv2.imwrite(filename, image)
-    return filename
-
-
-# SIDEBAR
-st.sidebar.header("🎛️ Application Demo")
-col1, col2 = st.sidebar.columns(2)
-with col1:
-    theme_mode = st.radio("Theme", ["Light", "Dark"], index=0)
-with col2:
-    input_type = st.radio("Input", ["Image", "Video"], index=0)
-
-st.sidebar.divider()
-
-st.sidebar.header("🛠 Preprocessing")
-enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
-gamma_val = st.sidebar.slider(
-    "Gamma Correction",
-    min_value=0.8,
-    max_value=1.6,
-    value=1.2,
-    step=0.1,
-    help="Increase gamma to brighten low-light indoor CCTV images",
-)  # Untuk mengatur seberapa cerah gambar
-
-blur_k = st.sidebar.selectbox(
-    "Gaussian Blur Kernel",
-    [3, 5, 7],
-    index=1,
-    help=("To reduce noise in low light circumstances"),
-)  # Untuk reduce noise di low light karena indoor
-
-st.sidebar.header("⚙️ Inference Settings")
-st.sidebar.caption(
-    "Adjust how the model detects people\n"
-    "These settings affect accuracy, speed, and noise reduction"
-)
-conf_thres = st.sidebar.slider(
-    "Confidence Threshold",
-    min_value=0.1,
-    max_value=0.9,
-    value=0.5,
-    step=0.05,
-    help=(
-        "Minimum confidence score required to display a detection\n"
-        "Low value = more detections but may include false positives\n"
-        "High value = fewer but usually more reliable detections"
-    ),
-)  # Atur sensitivitas detection
-
-iou_thres = st.sidebar.slider(
-    "IoU Threshold",
-    min_value=0.3,
-    max_value=0.8,
-    value=0.6,
-    step=0.05,
-    help=(
-        "Controls how overlapping bounding boxes are merged\n"
-        "Lower IoU = stricter suppression\n"
-        "Higher IoU = allows more overlapping boxes"
-    ),
-)  # Atur overlap antar bounding box
-
-max_det = st.sidebar.slider(
-    "Max Detections",
-    10,
-    500,
-    300,
-    50,
-    help=("Maximum of object that you want to detect?"),
-)  # Batas maksimum objek yang dapat terdeteksi
-
-# IMAGE MODE
-if input_type == "Image":
-    file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
-    if file:
-        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
-        frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
-
-        results = model.predict(
-            frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
-        )[0]
-
-        output, count = draw_boxes(frame.copy(), results, conf_thres)
-        label, badge = classify_crowd(count)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.image(output, channels="BGR")
-        with col2:
-            st.metric("People Count", count)
-            st.markdown(
-                f'<span class="badge {badge}">{label}</span>', unsafe_allow_html=True
-            )
-
-        path = save_screenshot(output, "image")
-        st.success(f"Screenshot saved: {path}")
-
-# VIDEO MODE
-else:
-    vid = st.file_uploader("Upload Video", ["mp4", "avi", "mov"])
-    if vid:
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(vid.read())
-
-        cap = cv2.VideoCapture(tfile.name)
-        stframe = st.empty()
-        last_frame = None
-
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
-            results = model.predict(
-                frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
-            )[0]
-
-            output, count = draw_boxes(frame.copy(), results, conf_thres)
-            label, _ = classify_crowd(count)
-            last_frame = output.copy()
-
-            cv2.putText(
-                output,
-                f"People: {count} | Crowd: {label}",
-                (20, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (255, 255, 255),
-                2,
-            )
-
-            stframe.image(output, channels="BGR")
-
-        cap.release()
-        os.remove(tfile.name)
-
-        if last_frame is not None:
-            path = save_screenshot(last_frame, "video")
-            st.success(f"Screenshot saved: {path}")
 
 # FOOTER
 st.markdown("---")
