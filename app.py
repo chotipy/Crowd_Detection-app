@@ -12,7 +12,9 @@ from datetime import datetime
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
 
 # THEME
-theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
+# theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
+# input_type = st.sidebar.radio("Input Type", ["Image", "Video"])
+
 
 # THEME STYLING
 if theme_mode == "Light":
@@ -283,10 +285,13 @@ def save_screenshot(image, prefix):  # Save screenshot
 
 
 # SIDEBAR
-input_type = st.sidebar.radio("Input Type", ["Image", "Video"])
-
+st.sidebar.header("🎛️ Application Demo")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    theme_mode = st.radio("Theme", ["Light", "Dark"], label_visibility="visible")
+with col2:
+    input_type = st.radio("Input", ["Image", "Video"], label_visibility="visible")
 st.sidebar.divider()
-
 st.sidebar.header("🛠 Preprocessing")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
