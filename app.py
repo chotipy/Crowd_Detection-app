@@ -136,10 +136,7 @@ blur_k = st.sidebar.selectbox(
 
 st.sidebar.divider()
 st.sidebar.subheader("⚙️ Inference Settings")
-st.sidebar.header(
-    "Adjust how the model detects people\n",
-    "These settings affect accuracy, speed, and noise reduction\n",
-)
+st.sidebar.header("These settings affect accuracy, speed, and noise reduction")
 
 conf_thres = st.sidebar.slider(
     "Confidence Threshold",
