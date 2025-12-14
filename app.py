@@ -295,28 +295,29 @@ st.sidebar.divider()
 st.sidebar.header("🛠 Preprocessing")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
-    "Gamma", 0.8, 1.6, 1.2, 0.1, help=("To help brighten low light picture")
+    "Gamma", 0, 0.1, 0.8, 1.2, 1.6, help=("To help brighten low light picture")
 )  # Untuk mengatur seberapa cerah gambar
 blur_k = st.sidebar.selectbox(
     "Gaussian Blur Kernel",
-    [3, 5, 7],
+    [0, 3, 5, 7],
     index=1,
     help=("To reduce noise in low light circumstances"),
 )  # Untuk reduce noise di low light karena indoor
 
 st.sidebar.header("⚙️ Inference Settings")
 st.caption(
-    "Adjust how the model detects people. "
-    "These settings affect accuracy, speed, and noise reduction."
+    "Adjust how the model detects people\n"
+    "These settings affect accuracy, speed, and noise reduction"
 )
 conf_thres = st.sidebar.slider(
     "Confidence Threshold",
-    0.1,
+    1,
     0.9,
-    0.4,
-    0.05,
+    0.5,
+    0.1,
+    0,
     help=(
-        "Minimum confidence score required to display a detection.\n"
+        "Minimum confidence score required to display a detection\n"
         "Low value = more detections but may include false positives\n"
         "High value = fewer but usually more reliable detections"
     ),
@@ -327,17 +328,17 @@ iou_thres = st.sidebar.slider(
     0.3,
     0.8,
     0.6,
-    0.05,
+    0,
     help=(
-        "Controls how overlapping bounding boxes are merged.\n"
-        "Lower IoU = stricter suppression"
+        "Controls how overlapping bounding boxes are merged\n"
+        "Lower IoU = stricter suppression\n"
         "Higher IoU = allows more overlapping boxes"
     ),
 )  # Atur overlap antar bounding box
 
 max_det = st.sidebar.slider(
     "Max Detections",
-    50,
+    10,
     500,
     300,
     50,
