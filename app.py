@@ -16,24 +16,23 @@ theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
 
 # THEME STYLING
 if theme_mode == "Light":
-    bg_color = "#f3f2f1"
-    card_bg = "rgba(255, 255, 255, 0.85)"
-    sidebar_bg = "#f7f2ee"
-    text_color = "#1b1918"
-    text_secondary = "#6d655f"
-    border_color = "rgba(0, 0, 0, 0.08)"
+    bg_color = "#f6eef4"
+    card_bg = "rgba(255, 255, 255, 0.75)"
+    sidebar_bg = "#eddee9"
+    text_color = "#21121d"
+    text_secondary = "#633656"
+    border_color = "rgba(166, 89, 144, 0.15)"
     accent_color = "#a65990"
-    shadow = "0 8px 32px rgba(0, 0, 0, 0.08)"
+    shadow = "0 8px 32px rgba(166, 89, 144, 0.12)"
 else:
-    bg_color = "#131211"
-    card_bg = "rgba(58, 46, 44, 0.85)"
-    sidebar_bg = "#1b1918"
-    text_color = "#f4f1f0"
-    text_secondary = "#a09892"
-    border_color = "rgba(255, 255, 255, 0.08)"
+    bg_color = "#3a2e2c"
+    card_bg = "rgba(87, 70, 66, 0.65)"
+    sidebar_bg = "#1d1716"
+    text_color = "#e9e3e2"
+    text_secondary = "#bdaca8"
+    border_color = "rgba(189, 172, 168, 0.12)"
     accent_color = "#c99cbc"
-    shadow = "0 8px 32px rgba(0, 0, 0, 0.35)"
-
+    shadow = "0 8px 32px rgba(0, 0, 0, 0.4)"
 
 st.markdown(
     f"""
@@ -284,31 +283,61 @@ def save_screenshot(image, prefix):  # Save screenshot
 
 
 # SIDEBAR
-input_type = st.sidebar.radio(
-    "Input Type", ["Image", "Video"]
-)  # Input foto atau gambar di
+input_type = st.sidebar.radio("Input Type", ["Image", "Video"])
+
+st.sidebar.divider()
+
 st.sidebar.header("🛠 Preprocessing")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
-    "Gamma", 0.8, 1.6, 1.2, 0.1
+    "Gamma", 0.8, 1.6, 1.2, 0.1, help=("To help brighten low light picture")
 )  # Untuk mengatur seberapa cerah gambar
 blur_k = st.sidebar.selectbox(
-    "Gaussian Blur Kernel", [3, 5, 7], index=1
+    "Gaussian Blur Kernel",
+    [3, 5, 7],
+    index=1,
+    help=("To reduce noise in low light circumstances"),
 )  # Untuk reduce noise di low light karena indoor
 
-st.sidebar.divider()
 st.sidebar.header("⚙️ Inference Settings")
+st.caption(
+    "Adjust how the model detects people. "
+    "These settings affect accuracy, speed, and noise reduction."
+)
 conf_thres = st.sidebar.slider(
-    "Confidence Threshold", 0.1, 0.9, 0.4, 0.05
+    "Confidence Threshold",
+    0.1,
+    0.9,
+    0.4,
+    0.05,
+    help=(
+        "Minimum confidence score required to display a detection.\n"
+        "Low value = more detections but may include false positives\n"
+        "High value = fewer but usually more reliable detections"
+    ),
 )  # Atur sensitivitas detection
-iou_thres = st.sidebar.slider(
-    "IoU Threshold", 0.3, 0.8, 0.6, 0.05
-)  # Atur overlap antar bounding box
-max_det = st.sidebar.slider(
-    "Max Detections", 50, 500, 300, 50
-)  # Batas maksimum objek yang dapat terdeteksi
 
-st.sidebar.divider()
+iou_thres = st.sidebar.slider(
+    "IoU Threshold",
+    0.3,
+    0.8,
+    0.6,
+    0.05,
+    help=(
+        "Controls how overlapping bounding boxes are merged.\n"
+        "Lower IoU = stricter suppression"
+        "Higher IoU = allows more overlapping boxes"
+    ),
+)  # Atur overlap antar bounding box
+
+max_det = st.sidebar.slider(
+    "Max Detections",
+    50,
+    500,
+    300,
+    50,
+    help=("Maximum of object that you want to detect?"),
+)  # Batas maksimum objek yang dapat terdeteksi
 
 # IMAGE MODE
 if input_type == "Image":
