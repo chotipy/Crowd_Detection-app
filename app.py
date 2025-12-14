@@ -14,11 +14,40 @@ theme_mode = "Light"
 
 # HEADER
 st.markdown(
-    '<h1 align="Crowd Detection and Classification</h1>', unsafe_allow_html=True
-)
-st.write(
-    "a YOLOv8-based crowd detection system for indoor CCTV with customizable "
-    "Inference and Preprocessing Parameters"
+    """
+    <style>
+    .header-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-title {
+        font-size: 2.6rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-desc {
+        font-size: 1.05rem;
+        max-width: 720px;
+        margin: 0 auto;
+        opacity: 0.85;
+        line-height: 1.6;
+    }
+    </style>
+
+    <div class="header-container">
+        <div class="header-title">
+            Crowd Detection and Density Classification
+        </div>
+        <div class="header-desc">
+            A YOLOv8-based system for detecting, counting, and classifying crowd levels
+            in indoor CCTV footage with configurable inference and preprocessing parameters.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 
