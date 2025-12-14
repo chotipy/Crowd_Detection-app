@@ -299,8 +299,8 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h2 {{
-        font-size: 0.0em;
-        font-weight: 1.5em;
+        font-size: 0.800em;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: {text_secondary};
