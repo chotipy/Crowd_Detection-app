@@ -229,21 +229,17 @@ st.markdown(
 #     "inference and preprocessing parameters."
 # )
 
-# Use columns to ensure content is fully centered (optional but effective)
-col1, col2, col3 = st.columns([1, 4, 1])
-
-with col2:
-    st.markdown(
-        "<h1 style='text-align: center; color: #007ACC;'>Crowd Density Analyzer</h1>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<p style='text-align: center; font-size: 18px; color: #3A3A3A;'>"
-        "Upload a video or image to deploy a high-performance YOLOv8 model for real-time crowd detection and counting."
-        "</p>",
-        unsafe_allow_html=True,
-    )
-    st.markdown("---")  # Add a horizontal line for separation
+## Option 1: Focus on Safety
+st.markdown(
+    "<h1 style='text-align: center; color: #FF4B4B;'>🚨 Real-Time Crowd Safety Monitor</h1>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<h4 style='text-align: center; color: gray;'>"
+    "Instantly detect and count people in CCTV streams using YOLOv8 to prevent overcrowding and ensure venue safety."
+    "</h4>",
+    unsafe_allow_html=True,
+)
 
 
 # LOAD MODEL
@@ -303,44 +299,33 @@ def save_screenshot(image, prefix):  # Save screenshot
 # SIDEBAR
 st.sidebar.header("🎛️ Application Demo")
 col1, col2 = st.sidebar.columns(2)
-
 with col1:
     theme_mode = st.radio("Theme", ["Light", "Dark"], label_visibility="visible")
-
 with col2:
-    input_type = st.sidebar.radio(
-        "Input", ["Image", "Video"], label_visibility="visible"
-    )
-
+    input_type = st.radio("Input", ["Image", "Video"], label_visibility="visible")
 st.sidebar.divider()
-
 st.sidebar.header("🛠 Preprocessing")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
-
 gamma_val = st.sidebar.slider(
-    "Gamma",
+    "Gamma Correction",
     min_value=0.8,
     max_value=1.6,
     value=1.2,
     step=0.1,
-    help="To help brighten low light picture",
+    help="Increase gamma to brighten low-light indoor CCTV images",
 )  # Untuk mengatur seberapa cerah gambar
-
 blur_k = st.sidebar.selectbox(
     "Gaussian Blur Kernel",
     [3, 5, 7],
     index=1,
-    help="To reduce noise in low light circumstances",
+    help=("To reduce noise in low light circumstances"),
 )  # Untuk reduce noise di low light karena indoor
-
-st.sidebar.divider()
 
 st.sidebar.header("⚙️ Inference Settings")
 st.sidebar.caption(
     "Adjust how the model detects people\n"
     "These settings affect accuracy, speed, and noise reduction"
 )
-
 conf_thres = st.sidebar.slider(
     "Confidence Threshold",
     min_value=0.1,
@@ -369,11 +354,11 @@ iou_thres = st.sidebar.slider(
 
 max_det = st.sidebar.slider(
     "Max Detections",
-    min_value=10,
-    max_value=500,
-    value=300,
-    step=50,
-    help="Maximum of object that you want to detect?",
+    10,
+    500,
+    300,
+    50,
+    help=("Maximum of object that you want to detect?"),
 )  # Batas maksimum objek yang dapat terdeteksi
 
 # IMAGE MODE
