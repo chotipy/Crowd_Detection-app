@@ -291,7 +291,7 @@ col1, col2 = st.sidebar.columns(2)
 with col1:
     theme_mode = st.radio("Theme", ["Light", "Dark"], label_visibility="visible")
 with col2:
-    input_type = st.radio("Input", ["Image", "Video"], abel_visibility="visible")
+    input_type = st.radio("Input", ["Image", "Video"], label_visibility="visible")
 
 st.sidebar.divider()
 
