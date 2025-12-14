@@ -425,14 +425,14 @@ st.markdown(
         background: {card_bg};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
-        border: 2px dashed {border_color};
+        border: 2px dashed {text_color};
         padding: 2rem;
     }}
 
     div[data-testid="stFileUploader"] label {{
         font-size: 0.875rem;
         font-weight: 500;
-        color: {text_color};
+        color: {text_secondary};
     }}
 
     /* Success Message */
