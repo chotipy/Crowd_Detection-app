@@ -386,19 +386,19 @@ st.markdown(
 
     .low {{ 
         background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
+        color: {text_color};
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }}
     
     .mid {{ 
         background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: white;
+        color: {text_color};
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }}
     
     .high {{ 
         background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
+        color: {text_color};
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }}
 
