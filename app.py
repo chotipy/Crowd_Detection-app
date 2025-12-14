@@ -10,7 +10,7 @@ from datetime import datetime
 
 # CONFIG
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
-theme_mode = []
+theme_mode = "Light"
 
 # THEME STYLING
 if theme_mode == "Light":
@@ -218,16 +218,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# HEADER
-# st.title("Crowd Detection & Classification")
-# st.write(
-#     "YOLOv8-based crowd detection system for indoor CCTV with customizable "
-#     "inference and preprocessing parameters."
-# )
 
-## Option 1: Focus on Safety
 st.markdown(
-    "<h1 style='text-align: center; color: #FF4B4B;'>🚨 Real-Time Crowd Safety Monitor</h1>",
+    "<h1 style='text-align: center; color: #1d1716;'>Real-Time Crowd Safety Monitor</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
