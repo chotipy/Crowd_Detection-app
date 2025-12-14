@@ -106,7 +106,7 @@ def save_screenshot(image, prefix):  # Save screenshot
 
 
 # SIDEBAR
-st.sidebar.header("🎛️ Application Demo")
+st.sidebar.title("🎛️ Application Demo")
 col1, col2 = st.sidebar.columns(2)
 with col1:
     theme_mode = st.radio("Theme", ["Light", "Dark"], index=0)
@@ -115,8 +115,8 @@ with col2:
 
 st.sidebar.divider()
 
-st.sidebar.header("🛠 Preprocessing")
-st.sidebar.caption("Please enable the preprocessing tick for better experience!")
+st.sidebar.subtitle("🛠 Preprocessing")
+st.sidebar.header("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
     "Gamma Correction",
@@ -135,8 +135,8 @@ blur_k = st.sidebar.selectbox(
 )  # Untuk reduce noise di low light karena indoor
 
 st.sidebar.divider()
-st.sidebar.header("⚙️ Inference Settings")
-st.sidebar.caption(
+st.sidebar.subtitle("⚙️ Inference Settings")
+st.sidebar.header(
     "Adjust how the model detects people\n"
     "These settings affect accuracy, speed, and noise reduction"
 )
