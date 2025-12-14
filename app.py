@@ -116,7 +116,7 @@ with col2:
 st.sidebar.divider()
 
 st.sidebar.header("🛠 Preprocessing")
-st.sidebar.subheader("Please enable the preprocessing tick for better experience!")
+st.sidebar.header("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
     "Gamma Correction",
@@ -136,7 +136,7 @@ blur_k = st.sidebar.selectbox(
 
 st.sidebar.divider()
 st.sidebar.header("⚙️ Inference Settings")
-st.sidebar.subheader(
+st.sidebar.header(
     "Adjust how the model detects people\n"
     "These settings affect accuracy, speed, and noise reduction"
 )
