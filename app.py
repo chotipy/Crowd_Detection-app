@@ -325,7 +325,7 @@ st.markdown(
     /* Card Styling */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stImage"]),
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stMetric"]) {{
-        background: {card_bg};
+        background: {card_bg} !important;
         backdrop-filter: blur(20px);
         border-radius: 1rem;
         border: 1px solid {border_color};
@@ -425,14 +425,14 @@ st.markdown(
         background: {card_bg};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
-        border: 2px dashed {text_color};
+        border: 2px dashed {border_color};
         padding: 2rem;
     }}
 
     div[data-testid="stFileUploader"] label {{
         font-size: 0.875rem;
         font-weight: 500;
-        color: {text_secondary};
+        color: {text_color};
     }}
 
     /* Success Message */
