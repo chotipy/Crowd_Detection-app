@@ -422,7 +422,7 @@ st.markdown(
 
     /* File Uploader */
     div[data-testid="stFileUploader"] {{
-        background: {card_bg};
+        background: {bg_color};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
         border: 2px dashed {border_color};
