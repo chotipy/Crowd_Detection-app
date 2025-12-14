@@ -12,8 +12,8 @@ from datetime import datetime
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
 
 # THEME
-# theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
-# input_type = st.sidebar.radio("Input Type", ["Image", "Video"])
+theme_mode = []
+input_type = []
 
 
 # THEME STYLING
