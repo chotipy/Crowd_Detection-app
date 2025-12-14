@@ -16,21 +16,24 @@ theme_mode = st.sidebar.radio("Theme Mode", ["Light", "Dark"])
 
 # THEME STYLING
 if theme_mode == "Light":
-    bg_color = "#f8f9fa"
-    card_bg = "rgba(255, 255, 255, 0.7)"
-    sidebar_bg = "rgba(255, 255, 255, 0.85)"
-    text_color = "#1a1a1a"
-    text_secondary = "#6c757d"
+    bg_color = "#f3f2f1"
+    card_bg = "rgba(255, 255, 255, 0.85)"
+    sidebar_bg = "#f7f2ee"
+    text_color = "#1b1918"
+    text_secondary = "#6d655f"
     border_color = "rgba(0, 0, 0, 0.08)"
+    accent_color = "#a65990"
     shadow = "0 8px 32px rgba(0, 0, 0, 0.08)"
 else:
-    bg_color = "#0f1419"
-    card_bg = "rgba(30, 35, 45, 0.7)"
-    sidebar_bg = "rgba(20, 25, 35, 0.85)"
-    text_color = "#ffffff"
-    text_secondary = "#a0a0a0"
+    bg_color = "#131211"
+    card_bg = "rgba(58, 46, 44, 0.85)"
+    sidebar_bg = "#1b1918"
+    text_color = "#f4f1f0"
+    text_secondary = "#a09892"
     border_color = "rgba(255, 255, 255, 0.08)"
-    shadow = "0 8px 32px rgba(0, 0, 0, 0.3)"
+    accent_color = "#c99cbc"
+    shadow = "0 8px 32px rgba(0, 0, 0, 0.35)"
+
 
 st.markdown(
     f"""
@@ -281,6 +284,19 @@ def save_screenshot(image, prefix):  # Save screenshot
 
 
 # SIDEBAR
+input_type = st.sidebar.radio(
+    "Input Type", ["Image", "Video"]
+)  # Input foto atau gambar di
+st.sidebar.header("🛠 Preprocessing")
+enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
+gamma_val = st.sidebar.slider(
+    "Gamma", 0.8, 1.6, 1.2, 0.1
+)  # Untuk mengatur seberapa cerah gambar
+blur_k = st.sidebar.selectbox(
+    "Gaussian Blur Kernel", [3, 5, 7], index=1
+)  # Untuk reduce noise di low light karena indoor
+
+st.sidebar.divider()
 st.sidebar.header("⚙️ Inference Settings")
 conf_thres = st.sidebar.slider(
     "Confidence Threshold", 0.1, 0.9, 0.4, 0.05
@@ -293,17 +309,6 @@ max_det = st.sidebar.slider(
 )  # Batas maksimum objek yang dapat terdeteksi
 
 st.sidebar.divider()
-st.sidebar.header("🛠 Preprocessing")
-enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
-gamma_val = st.sidebar.slider(
-    "Gamma", 0.8, 1.6, 1.2, 0.1
-)  # Untuk mengatur seberapa cerah gambar
-blur_k = st.sidebar.selectbox(
-    "Gaussian Blur Kernel", [3, 5, 7], index=1
-)  # Untuk reduce noise di low light karena indoor
-
-st.sidebar.divider()
-input_type = st.sidebar.radio("Input Type", ["Image", "Video"])
 
 # IMAGE MODE
 if input_type == "Image":
