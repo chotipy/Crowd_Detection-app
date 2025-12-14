@@ -45,6 +45,9 @@ st.markdown(
             A YOLOv8-based system for detecting, counting, and classifying crowd levels
             in indoor CCTV footage with configurable inference and preprocessing parameters.
         </div>
+            <div class="header-capt">
+            Please enable the preprocessing tick for better experience :)
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
