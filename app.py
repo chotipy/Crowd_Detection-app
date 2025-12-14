@@ -45,9 +45,6 @@ st.markdown(
             A YOLOv8-based system for detecting, counting, and classifying crowd levels
             in indoor CCTV footage with configurable inference and preprocessing parameters.
         </div>
-            <div class="header-capt">
-            Please enable the preprocessing tick for better experience :)
-        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -119,6 +116,7 @@ with col2:
 st.sidebar.divider()
 
 st.sidebar.header("🛠 Preprocessing")
+st.sidebar.caption("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
     "Gamma Correction",
@@ -136,6 +134,7 @@ blur_k = st.sidebar.selectbox(
     help=("To reduce noise in low light circumstances"),
 )  # Untuk reduce noise di low light karena indoor
 
+st.sidebar.divider()
 st.sidebar.header("⚙️ Inference Settings")
 st.sidebar.caption(
     "Adjust how the model detects people\n"
