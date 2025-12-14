@@ -10,6 +10,7 @@ from datetime import datetime
 
 # CONFIG
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
+theme_mode = []
 
 # THEME STYLING
 if theme_mode == "Light":
