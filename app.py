@@ -145,8 +145,8 @@ conf_thres = st.sidebar.slider(
     value=0.5,
     step=0.05,
     help=(
-        "Minimum confidence score required to display a detection\n"
-        "Low value = more detections but may include false positives\n"
+        "Minimum confidence score required to display a detection\n\n"
+        "Low value = more detections but may include false positives\n\n"
         "High value = fewer but usually more reliable detections"
     ),
 )  # Atur sensitivitas detection
@@ -158,9 +158,9 @@ iou_thres = st.sidebar.slider(
     value=0.6,
     step=0.05,
     help=(
-        "Controls how overlapping bounding boxes are merged\n"
-        "Lower IoU = stricter suppression\n"
-        "Higher IoU = allows more overlapping boxes"
+        "Controls how overlapping bounding boxes are merged\n\n"
+        "Lower IoU = stricter suppression\n\n"
+        "Higher IoU = allows more overlapping boxes\n"
     ),
 )  # Atur overlap antar bounding box
 
@@ -308,7 +308,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 1.5em;
+        font-size: 1em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -354,7 +354,7 @@ st.markdown(
     div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
         font-size: 2.5rem;
         font-weight: 700;
-        color: {sidebar_bg};
+        color: {text_color};
     }}
 
     /* Title Styling */
