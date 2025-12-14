@@ -325,7 +325,7 @@ st.markdown(
     /* Card Styling */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stImage"]),
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stMetric"]) {{
-        background: {card_bg} !important;
+        background: {card_bg};
         backdrop-filter: blur(20px);
         border-radius: 1rem;
         border: 1px solid {border_color};
