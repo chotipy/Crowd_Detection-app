@@ -1,1 +1,2 @@
-# crowd-detection-yolo
+# Crowd Detection & Crowd Level Classification using YOLOv8
+This system employs the YOLOv8 object detection architecture to identify human instances from CCTV-style indoor images and videos. To improve robustness under low-light conditions, gamma correction and Gaussian blur are applied as optional preprocessing steps. Detected individuals are counted and mapped into crowd density categories using a rule-based classification approach. The inference process is configurable through adjustable parameters such as confidence threshold, IoU threshold, and maximum detections.
