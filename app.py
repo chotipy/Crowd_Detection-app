@@ -219,15 +219,13 @@ st.markdown(
 )
 
 
+# HEADER
 st.markdown(
-    "<h1 style='text-align: center; color: #1d1716;'>Real-Time Crowd Safety Monitor</h1>",
-    unsafe_allow_html=True,
+    '<h1 align="Crowd Detection and Classification</h1>', unsafe_allow_html=True
 )
-st.markdown(
-    "<h4 style='text-align: center; color: gray;'>"
-    "Instantly detect and count people in CCTV streams using YOLOv8 to prevent overcrowding and ensure venue safety."
-    "</h4>",
-    unsafe_allow_html=True,
+st.write(
+    "a YOLOv8-based crowd detection system for indoor CCTV with customizable "
+    "Inference and Preprocessing Parameters"
 )
 
 
@@ -289,9 +287,9 @@ def save_screenshot(image, prefix):  # Save screenshot
 st.sidebar.header("🎛️ Application Demo")
 col1, col2 = st.sidebar.columns(2)
 with col1:
-    theme_mode = st.radio("Theme", ["Light", "Dark"], label_visibility="visible")
+    theme_mode = st.radio("Theme", ["Light", "Dark"], index=0)
 with col2:
-    input_type = st.radio("Input", ["Image", "Video"], label_visibility="visible")
+    input_type = st.radio("Input", ["Image", "Video"], index=0)
 
 st.sidebar.divider()
 
