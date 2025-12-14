@@ -11,10 +11,6 @@ from datetime import datetime
 # CONFIG
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
 
-# THEME
-theme_mode = []
-input_type = []
-
 # THEME STYLING
 if theme_mode == "Light":
     bg_color = "#f6eef4"
