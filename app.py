@@ -349,14 +349,16 @@ else:
             st.markdown(
                 f"""
     <div style="
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.75rem;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:0.75rem 1rem;
+        border-radius:0.75rem;
+        background:rgba(0,0,0,0.03);
+        margin-top:0.5rem;
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
-        <div class="badge {avg_badge}">{avg_label}</div>
+        <span class="badge {avg_badge}">{avg_label}</span>
     </div>
     """,
                 unsafe_allow_html=True,
