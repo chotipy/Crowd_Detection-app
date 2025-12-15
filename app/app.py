@@ -55,7 +55,7 @@ st.markdown(
 # LOAD MODEL
 @st.cache_resource(show_spinner="Loading YOLO model..")
 def load_model():
-    model = YOLO("model/best.pt")
+    model = YOLO("app/model/best.pt")
     model.to("cpu")
     return model
 
