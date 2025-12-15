@@ -51,7 +51,7 @@ st.markdown(
 )
 
 
-# LOAD MODEL with proper error handling
+# LOAD MODEL
 @st.cache_resource(show_spinner="Loading YOLO model..")
 def load_model():
     model = YOLO("model/best.pt")
@@ -60,14 +60,6 @@ def load_model():
 
 
 model = load_model()
-
-# LOADING STATUS
-with st.spinner("Initializing model.."):
-    model = load_model()
-
-if model is None:
-    st.error("⚠️ Cannot proceed without a valid model. Please fix the issues above.")
-    st.stop()
 
 
 # PREPROCESSING
@@ -110,19 +102,6 @@ def draw_boxes(image, results, conf):
     except Exception as e:
         st.warning(f"Drawing boxes error: {e}")
     return image, count
-
-
-def save_screenshot(image, prefix):
-    try:
-        os.makedirs("screenshots", exist_ok=True)
-        filename = (
-            f"screenshots/{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-        )
-        cv2.imwrite(filename, image)
-        return filename
-    except Exception as e:
-        st.warning(f"Failed to save screenshot: {e}")
-        return None
 
 
 # SIDEBAR
