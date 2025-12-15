@@ -197,7 +197,7 @@ if input_type == "Image":
 
     if file:
         img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
-
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         frame = preprocess_frame(img, enable_preprocess, gamma_val, blur_k)
 
         results = model.predict(
