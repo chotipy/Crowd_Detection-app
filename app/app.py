@@ -113,36 +113,37 @@ st.markdown(
     <th>People Count</th>
     <th>Crowd Label</th>
 </tr>
-<tr style="background-color:#6b8f71;">
+<tr style="background-color:#4CAF7D;">
     <td>≤ 3</td>
-    <td><b>Few</b></td>
+    <td><b>FEW</b></td>
 </tr>
-<tr style="background-color:#c9a227;">
+<tr style="background-color:#E39A3B;">
     <td>4 – 30</td>
-    <td><b>Medium</b></td>
+    <td><b>MEDIUM</b></td>
 </tr>
-<tr style="background-color:#8b3a3a;">
+<tr style="background-color:#E04B3F;">
     <td>&gt; 30</td>
-    <td><b>Crowded</b></td>
+    <td><b>CROWDED</b></td>
 </tr>
 </table>
 
 <style>
 .custom-table {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .custom-table td,
 .custom-table th {
-    color: #f5f5f5 !important;
-    font-weight: 600;
+    color: {text_color};
+    font-weight: 700;
     text-align: center;
-    padding: 8px;
+    padding: 10px;
+    letter-spacing: 0.5px;
 }
 
 .custom-table th {
-    background-color: #3b2f2f;
+    background-color: #2b1f1f;
 }
 </style>
 """,
