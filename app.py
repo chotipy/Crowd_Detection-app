@@ -329,6 +329,9 @@ else:
         # Show preview of last frame
         if last_frame is not None:
             with st.expander("Preview Last Frame"):
+                st.caption(
+                    "You can custom your preprocessing and inference on the sidebar by adjusting to the frame here"
+                )
                 st.image(
                     last_frame,
                     channels="BGR",
