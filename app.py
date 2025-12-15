@@ -281,8 +281,11 @@ else:
         os.remove(tfile.name)
 
         st.success("Video processed successfully!")
-        st.video(out_path)
+        # Read video as bytes (Cloud-safe)
+        with open(out_path, "rb") as f:
+            video_bytes = f.read()
 
+        st.video(video_bytes)
 
 # THEME STYLING
 if theme_mode == "Light":
