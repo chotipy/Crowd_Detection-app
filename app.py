@@ -311,6 +311,7 @@ else:
             st.subheader("📊 Video Analysis")
             st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
+            st.markdown(f"**Average Crowd Level:**")
             st.markdown(
                 f'<div class="badge {avg_badge}">{avg_label}</div>',
                 unsafe_allow_html=True,
