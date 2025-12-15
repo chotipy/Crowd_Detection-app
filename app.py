@@ -357,7 +357,7 @@ else:
             st.info("Click the button above to download your processed video")
 
         with col2:
-            st.markdown("📊 Video Analysis")
+            st.subheader("📊 Video Analysis")
             st.metric("Average Count", avg_people)
             st.metric("Total Count", max_people)
             st.metric("Total Frames", frame_count)
