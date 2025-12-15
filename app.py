@@ -84,11 +84,11 @@ def preprocess_frame(frame, enable, gamma, blur_k):
 # UTILS
 def classify_crowd(count):
     if count <= 3:
-        return "Sedikit", "low"
+        return "Few", "low"
     elif count <= 30:
-        return "Sedang", "mid"
+        return "Medium", "mid"
     else:
-        return "Ramai", "high"
+        return "Crowded", "high"
 
 
 def draw_boxes(image, results, conf):
