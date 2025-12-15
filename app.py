@@ -1,19 +1,13 @@
 import streamlit as st
 import os
-import sys
+import tempfile
+from datetime import datetime
 
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 
-# Add error handling for imports
-try:
-    import cv2
-    import numpy as np
-    from ultralytics import YOLO
-    import tempfile
-    from datetime import datetime
-except ImportError as e:
-    st.error(f"Missing required package: {e}")
-    st.stop()
+import cv2
+import numpy as np
+from ultralytics import YOLO
 
 # CONFIG
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
@@ -60,31 +54,12 @@ st.markdown(
 # LOAD MODEL with proper error handling
 @st.cache_resource(show_spinner="Loading YOLO model..")
 def load_model():
-    try:
-        model_path = os.path.join("model", "best.pt")
+    model = YOLO("model/best.pt")
+    model.to("cpu")
+    return model
 
-        # Check if model exists
-        if not os.path.exists(model_path):
-            st.error(f"No model file not found at: {model_path}")
-            st.info("Please ensure 'model/best.pt' exists in your repository")
-            return None
 
-        # Load model with minimal settings for cloud environment
-        model = YOLO(model_path)
-        model.to("cpu")
-
-        # Warm up with a small dummy prediction to verify model works
-        dummy = np.zeros((640, 640, 3), dtype=np.uint8)
-        _ = model.predict(dummy, verbose=False, imgsz=640)
-
-        return model
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.info(
-            "Possible solutions:\n- Ensure ultralytics is installed\n- Check model file integrity\n- Verify sufficient memory"
-        )
-        return None
-
+model = load_model()
 
 # LOADING STATUS
 with st.spinner("Initializing model.."):
@@ -213,171 +188,107 @@ max_det = st.sidebar.slider(
 # IMAGE MODE
 if input_type == "Image":
     file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
+
     if file:
-        try:
-            img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
 
-            if img is None:
-                st.error("Failed to decode image. Please upload a valid image file.")
-                st.stop()
+        frame = preprocess_frame(img, enable_preprocess, gamma_val, blur_k)
 
-            frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
+        results = model.predict(
+            frame,
+            conf=conf_thres,
+            iou=iou_thres,
+            max_det=max_det,
+            device="cpu",
+            verbose=False,
+            imgsz=640,
+        )[0]
 
-            with st.spinner("Running detection..."):
-                results = model.predict(
-                    frame,
-                    conf=conf_thres,
-                    iou=iou_thres,
-                    max_det=max_det,
-                    verbose=False,
-                    imgsz=640,  # Fixed size for consistency
-                )[0]
+        output, count = draw_boxes(frame.copy(), results, conf_thres)
+        label, badge = classify_crowd(count)
 
-            output, count = draw_boxes(frame.copy(), results, conf_thres)
-            label, badge = classify_crowd(count)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.image(output, channels="BGR")
-            with col2:
-                st.metric("People Count", count)
-                st.markdown(f"**Crowd Level:** {label}")
-
-            path = save_screenshot(output, "image")
-            if path:
-                st.success(f"Screenshot saved: {path}")
-
-        except Exception as e:
-            st.error(f"Error processing image: {str(e)}")
-            st.exception(e)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(output, channels="BGR")
+        with col2:
+            st.metric("People Count", count)
+            st.markdown(
+                f'<div class="badge {badge}">{label}</div>', unsafe_allow_html=True
+            )
 
 # VIDEO MODE
 else:
     vid = st.file_uploader(
-        "Upload Video (Max 10 seconds recommended)", ["mp4", "avi", "mov"]
+        "Upload Video (≤10 seconds recommended)", ["mp4", "avi", "mov"]
     )
 
     if vid:
-        try:
-            # Save temp input video
-            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-            tfile.write(vid.read())
-            tfile.flush()
-            tfile.close()
+        tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+        tfile.write(vid.read())
+        tfile.close()
 
-            cap = cv2.VideoCapture(tfile.name)
+        cap = cv2.VideoCapture(tfile.name)
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-            if not cap.isOpened():
-                st.error("Failed to open video file. Please upload a valid video.")
-                os.remove(tfile.name)
-                st.stop()
+        MAX_FRAMES = 200
+        FRAME_SKIP = 4
 
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        out_path = "output_cloud.mp4"
+        out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
-            # Cloud-safe limits
-            MAX_FRAMES = min(300, total_frames)  # ~10 seconds @ 30 FPS
-            FRAME_SKIP = 3  # Process every 3rd frame
+        st.info("Processing video (cloud-safe mode)…")
+        progress = st.progress(0)
 
-            # Output video
-            out_path = f"output_cloud_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
-            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-            out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
+        frame_id = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret or frame_id > MAX_FRAMES:
+                break
 
-            if not out.isOpened():
-                st.error("Failed to create output video writer.")
-                cap.release()
-                os.remove(tfile.name)
-                st.stop()
+            frame_id += 1
+            if frame_id % FRAME_SKIP != 0:
+                out.write(frame)
+                continue
 
-            st.info(
-                f"Processing video: {total_frames} frames, processing every {FRAME_SKIP}rd frame..."
+            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
+
+            results = model.predict(
+                frame,
+                conf=conf_thres,
+                iou=iou_thres,
+                max_det=50,
+                device="cpu",
+                verbose=False,
+                imgsz=640,
+            )[0]
+
+            output, count = draw_boxes(frame.copy(), results, conf_thres)
+            label, _ = classify_crowd(count)
+
+            cv2.rectangle(output, (10, 5), (420, 55), (0, 0, 0), -1)
+            cv2.putText(
+                output,
+                f"People: {count} | Crowd: {label}",
+                (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                (255, 255, 255),
+                2,
             )
-            progress = st.progress(0)
 
-            frame_id = 0
-            processed = 0
+            out.write(output)
+            progress.progress(min(frame_id / MAX_FRAMES, 1.0))
 
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
+        cap.release()
+        out.release()
+        os.remove(tfile.name)
 
-                frame_id += 1
-                if frame_id > MAX_FRAMES:
-                    st.warning(f"Stopped at {MAX_FRAMES} frames to prevent timeout")
-                    break
+        st.success("Video processed successfully!")
 
-                # Skip frames to reduce load
-                if frame_id % FRAME_SKIP != 0:
-                    out.write(frame)
-                    continue
-
-                frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
-
-                # YOLO inference
-                results = model.predict(
-                    frame,
-                    conf=conf_thres,
-                    iou=iou_thres,
-                    max_det=min(max_det, 100),
-                    device="cpu",
-                    verbose=False,
-                    imgsz=640,
-                )[0]
-
-                output, count = draw_boxes(frame.copy(), results, conf_thres)
-                label, _ = classify_crowd(count)
-
-                cv2.putText(
-                    output,
-                    f"People: {count} | Crowd: {label}",
-                    (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.9,
-                    (255, 255, 255),
-                    2,
-                )
-
-                out.write(output)
-                processed += 1
-
-                progress.progress(min(frame_id / MAX_FRAMES, 1.0))
-
-            cap.release()
-            out.release()
-            os.remove(tfile.name)
-
-            st.success(f"Video processed successfully! ({processed} frames analyzed)")
-
-            if os.path.exists(out_path):
-                with open(out_path, "rb") as f:
-                    video_bytes = f.read()
-                st.video(video_bytes)
-
-                # Clean up output file after displaying
-                try:
-                    os.remove(out_path)
-                except:
-                    pass
-            else:
-                st.error("Output video file was not created")
-
-        except Exception as e:
-            st.error(f"Error processing video: {str(e)}")
-            st.exception(e)
-            # Cleanup
-            try:
-                if "cap" in locals():
-                    cap.release()
-                if "out" in locals():
-                    out.release()
-                if "tfile" in locals() and os.path.exists(tfile.name):
-                    os.remove(tfile.name)
-            except:
-                pass
+        with open(out_path, "rb") as f:
+            st.video(f.read())
 
 # THEME STYLING
 if theme_mode == "Light":
