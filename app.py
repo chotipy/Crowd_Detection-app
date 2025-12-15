@@ -239,8 +239,19 @@ else:
         out_path = "output_cloud.mp4"
         out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
-        st.info("Processing video.…")
-        progress = st.progress(0)
+        st.info("Processing video (cloud-safe mode)…")
+
+        # Create layout for real-time preview
+        progress_col, stats_col = st.columns([3, 1])
+        with progress_col:
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+        with stats_col:
+            live_count = st.empty()
+            live_label = st.empty()
+
+        # Real-time preview placeholder
+        preview_placeholder = st.empty()
 
         frame_id = 0
         total_people = 0
@@ -273,6 +284,7 @@ else:
             label, _ = classify_crowd(count)
 
             # Track statistics
+            total_people += count
             frame_count += 1
             max_people = max(max_people, count)
 
@@ -288,7 +300,15 @@ else:
             )
 
             out.write(output)
-            progress.progress(min(frame_id / MAX_FRAMES, 1.0))
+
+            # Update real-time display every processed frame
+            progress_bar.progress(min(frame_id / MAX_FRAMES, 1.0))
+            status_text.text(f"Processing frame {frame_id}/{MAX_FRAMES}")
+            live_count.metric("Current Count", count)
+            live_label.metric("Max Count", max_people)
+
+            # Show preview
+            preview_placeholder.image(output, channels="BGR", use_container_width=True)
 
         cap.release()
         out.release()
@@ -298,9 +318,13 @@ else:
         avg_people = round(total_people / frame_count) if frame_count > 0 else 0
         avg_label, avg_badge = classify_crowd(avg_people)
 
+        # Clear preview after processing
+        preview_placeholder.empty()
+        status_text.empty()
+
         st.success("Video processed successfully!")
 
-        # Display video and statistics side by side
+        # Display final video and statistics side by side
         col1, col2 = st.columns([2, 1])
 
         with col1:
@@ -309,18 +333,19 @@ else:
 
         with col2:
             st.subheader("📊 Video Analysis")
-            st.metric("Total People Count", max_people)
+            st.metric("Average People Count", avg_people)
+            st.metric("Total People Count", total_people)
             st.metric("Frames Analyzed", frame_count)
             st.markdown(
                 f"""
     <div style="
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        margin-top: 0.5rem;
+        gap: 0.50rem;
+        margin-top: 0.25rem;
         margin-bottom: 0.75rem;
     ">
-        <span style="font-weight:600;">Average Crowd Level:</span>
+        <span style="font-weight:600;">Average Crowd Level</span>
         <div class="badge {avg_badge}">{avg_label}</div>
     </div>
     """,
