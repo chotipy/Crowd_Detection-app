@@ -242,6 +242,10 @@ else:
         progress = st.progress(0)
 
         frame_id = 0
+        total_people = 0
+        frame_count = 0
+        max_people = 0
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret or frame_id > MAX_FRAMES:
@@ -267,6 +271,11 @@ else:
             output, count = draw_boxes(frame.copy(), results, conf_thres)
             label, _ = classify_crowd(count)
 
+            # Track statistics
+            total_people += count
+            frame_count += 1
+            max_people = max(max_people, count)
+
             cv2.rectangle(output, (10, 5), (420, 55), (0, 0, 0), -1)
             cv2.putText(
                 output,
@@ -285,10 +294,29 @@ else:
         out.release()
         os.remove(tfile.name)
 
+        # Calculate average
+        avg_people = round(total_people / frame_count) if frame_count > 0 else 0
+        avg_label, avg_badge = classify_crowd(avg_people)
+
         st.success("Video processed successfully!")
 
-        with open(out_path, "rb") as f:
-            st.video(f.read())
+        # Display video and statistics side by side
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            with open(out_path, "rb") as f:
+                st.video(f.read())
+
+        with col2:
+            st.subheader("📊 Video Statistics")
+            st.metric("Average People Count", avg_people)
+            st.metric("Peak People Count", max_people)
+            st.metric("Frames Analyzed", frame_count)
+            st.markdown(f"**Average Crowd Level:** {avg_label}")
+            st.markdown(
+                f'<div class="badge {avg_badge}">{avg_label}</div>',
+                unsafe_allow_html=True,
+            )
 
 # THEME STYLING
 if theme_mode == "Light":
@@ -427,19 +455,19 @@ st.markdown(
 
     .low {{ 
         background: linear-gradient(135deg, #10b981, #059669);
-        color: {text_color};
+        color: white;
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }}
     
     .mid {{ 
         background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: {text_color};
+        color: white;
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }}
     
     .high {{ 
         background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: {text_color};
+        color: white;
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }}
 
