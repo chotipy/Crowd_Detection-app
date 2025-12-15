@@ -113,15 +113,15 @@ st.markdown(
     <th>People Count</th>
     <th>Crowd Label</th>
 </tr>
-<tr style="background-color:#4CAF7D;">
+<tr style="background-color:##5FAF8A;">
     <td>≤ 3</td>
     <td><b>FEW</b></td>
 </tr>
-<tr style="background-color:#E39A3B;">
+<tr style="background-color:#E6A85C;">
     <td>4 – 30</td>
     <td><b>MEDIUM</b></td>
 </tr>
-<tr style="background-color:#E04B3F;">
+<tr style="background-color:#E35F55;">
     <td>&gt; 30</td>
     <td><b>CROWDED</b></td>
 </tr>
