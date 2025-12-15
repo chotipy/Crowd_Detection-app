@@ -114,8 +114,8 @@ with col2:
 
 st.sidebar.divider()
 
-st.sidebar.subheader("🛠 Preprocessing")
-st.sidebar.header("Please enable the preprocessing tick for better experience!")
+st.sidebar.header("🛠 Preprocessing")
+st.sidebar.label("Please enable the preprocessing tick for better experience!")
 enable_preprocess = st.sidebar.checkbox("Enable Preprocessing", True)
 gamma_val = st.sidebar.slider(
     "Gamma Correction",
@@ -134,8 +134,8 @@ blur_k = st.sidebar.selectbox(
 )
 
 st.sidebar.divider()
-st.sidebar.subheader("⚙️ Inference Settings")
-st.sidebar.header("These settings affect accuracy, speed, and noise reduction")
+st.sidebar.header("⚙️ Inference Settings")
+st.sidebar.label("These settings affect accuracy, speed, and noise reduction")
 
 conf_thres = st.sidebar.slider(
     "Confidence Threshold",
@@ -339,7 +339,7 @@ else:
             st.info("Click the button above to download your processed video")
 
         with col2:
-            st.subheader("📊 Video Analysis")
+            st.header("📊 Video Analysis")
             st.metric("Average Count", avg_people)
             st.metric("Total Count", max_people)
             st.metric("Total Frames", frame_count)
@@ -421,15 +421,6 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h2 {{
-        font-size: 0.800em;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: {text_secondary};
-        margin-bottom: 1rem;
-    }}
-
-    section[data-testid="stSidebar"] h3 {{
         font-size: 1.2em;
         font-weight: 600;
         text-transform: uppercase;
@@ -438,8 +429,17 @@ st.markdown(
         margin-bottom: 1rem;
     }}
 
+    section[data-testid="stSidebar"] h3 {{
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: {text_secondary};
+        margin-bottom: 1rem;
+    }}
+
     section[data-testid="stSidebar"] label {{
-        font-size: 0.500em;
+        font-size: 0.5em;
         font-weight: 500;
         color: {text_color};
     }}
