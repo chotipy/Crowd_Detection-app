@@ -211,7 +211,7 @@ if input_type == "Image":
         with col1:
             st.image(output, channels="BGR")
         with col2:
-            st.header("Here is your Image Summary!")
+            st.subheader("Image Analysis")
             st.metric("People Count", count)
             st.markdown(
                 f'<div class="badge {badge}">{label}</div>', unsafe_allow_html=True
@@ -308,7 +308,7 @@ else:
                 st.video(f.read())
 
         with col2:
-            st.header("Here is your Video Summary!")
+            st.subheader("Video Analysis")
             st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
             st.markdown(f"**Average Crowd Level:** {avg_label}")
@@ -450,6 +450,7 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-top: 1rem;
+        margin-bottom: 0.5rem;
     }}
 
     .low {{ 
