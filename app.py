@@ -203,40 +203,55 @@ else:
     vid = st.file_uploader("Upload Video", ["mp4", "avi", "mov"])
 
     if vid:
-        # Save temp input video
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(vid.read())
-        tfile.flush()
         tfile.close()
 
         cap = cv2.VideoCapture(tfile.name)
 
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        ret, first_frame = cap.read()
+        if not ret:
+            st.error("Failed to read video")
+            cap.release()
+            os.remove(tfile.name)
+            st.stop()
 
-        # Output video
+        height, width, _ = first_frame.shape
+
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        if fps == 0 or np.isnan(fps):
+            fps = 25
+
         out_path = f"output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
+
+        st.subheader("📊 Detection Summary")
+        count_placeholder = st.empty()
+        badge_placeholder = st.empty()
 
         progress = st.progress(0)
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         current = 0
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
+        with st.spinner("Processing video, please wait..."):
+            frame = preprocess_frame(
+                first_frame.copy(),
+                enable_preprocess,
+                gamma_val,
+                blur_k,
+            )
 
             results = model.predict(
-                frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
+                frame,
+                conf=conf_thres,
+                iou=iou_thres,
+                max_det=max_det,
+                verbose=False,
             )[0]
 
             output, count = draw_boxes(frame.copy(), results, conf_thres)
-            label, _ = classify_crowd(count)
+            label, badge = classify_crowd(count)
 
             cv2.putText(
                 output,
@@ -250,20 +265,60 @@ else:
 
             out.write(output)
 
-            current += 1
-            progress.progress(min(current / frame_count, 1.0))
+            count_placeholder.metric("People Count", count)
+            badge_placeholder.markdown(
+                f"""
+                <div class="badge {badge}">
+                    {label}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
+
+                frame = preprocess_frame(
+                    frame,
+                    enable_preprocess,
+                    gamma_val,
+                    blur_k,
+                )
+
+                results = model.predict(
+                    frame,
+                    conf=conf_thres,
+                    iou=iou_thres,
+                    max_det=max_det,
+                    verbose=False,
+                )[0]
+
+                output, count = draw_boxes(frame.copy(), results, conf_thres)
+                label, badge = classify_crowd(count)
+
+                cv2.putText(
+                    output,
+                    f"People: {count} | Crowd: {label}",
+                    (20, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (255, 255, 255),
+                    2,
+                )
+
+                out.write(output)
+
+                current += 1
+                progress.progress(min(current / frame_count, 1.0))
 
         cap.release()
         out.release()
         os.remove(tfile.name)
 
-        st.success("Video processing complete!")
-
+        st.success("✅ Video processing complete!")
         st.video(out_path)
-
-        final_frame = cv2.imread(out_path)
-        if final_frame is not None:
-            save_screenshot(final_frame, "video")
 
 # THEME STYLING
 if theme_mode == "Light":
