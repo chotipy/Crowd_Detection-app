@@ -105,7 +105,7 @@ def draw_boxes(image, results, conf):
 
 
 # SIDEBAR
-st.sidebar.title("🎛️ Application Demo")
+st.sidebar.header("🎛️ Application Demo")
 col1, col2 = st.sidebar.columns(2)
 with col1:
     theme_mode = st.radio("Theme", ["Light", "Dark"], index=0)
@@ -412,14 +412,14 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h1 {{
-        font-size: 1.2em;
+        font-size: 1em;
         font-weight: 600;
         letter-spacing: 0.05em;
         color: {text_secondary};
     }}
 
     section[data-testid="stSidebar"] h2 {{
-        font-size: 1.5em;
+        font-size: 1.2em;
         font-weight: 600;
         letter-spacing: 0.05em;
         text-transform: uppercase;
