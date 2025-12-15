@@ -106,6 +106,9 @@ def draw_boxes(image, results, conf):
 
 
 # DISPLAY TABLE
+
+st.markdown("---")
+
 data = {
     "People Count": ["≤ 3", "4 – 30", "> 30"],
     "Crowd Label": ["Few", "Medium", "Crowded"],
@@ -114,7 +117,7 @@ data = {
 
 df = pd.DataFrame(data)
 
-with st.expander("Crowd Density Reference"):
+with st.expander("Crowd Density Reference", expanded=True):
     st.dataframe(df, use_container_width=True)
 
 # SIDEBAR
