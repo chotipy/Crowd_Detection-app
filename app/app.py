@@ -108,7 +108,7 @@ def draw_boxes(image, results, conf):
 # DISPLAY TABLE
 st.markdown(
     """
-<table style="width:50%; border-collapse:collapse; margin-left:auto; margin-right:auto;">
+<table class="custom-table" style="width:50%; border-collapse:collapse; margin-left:auto; margin-right:auto;">
 <tr>
     <th>People Count</th>
     <th>Crowd Label</th>
@@ -125,13 +125,18 @@ st.markdown(
     <td>&gt; 30</td>
     <td><b>Crowded</b></td>
 </tr>
+</table>
+
 <style>
-.custom-table td {
+.custom-table td,
+.custom-table th {
     color: #111 !important;
     font-weight: 600;
-}
+    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f3f4f6;
 </style>
-</table>
 """,
     unsafe_allow_html=True,
 )
