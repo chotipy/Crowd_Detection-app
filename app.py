@@ -236,14 +236,10 @@ else:
         MAX_FRAMES = 200
         FRAME_SKIP = 4
 
-        out_path = "output_cloud.mp4"
-        temp_preview_path = "preview_temp.mp4"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = f"processed_video_{timestamp}.mp4"
 
         out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
-        # Create a temporary preview video that updates periodically
-        preview_writer = cv2.VideoWriter(
-            temp_preview_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h)
-        )
 
         st.info("⏳ Processing video...")
 
@@ -251,12 +247,11 @@ else:
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            st.markdown("Processing Preview (updates every 10 frames)")
-            preview_video = st.empty()
+            st.markdown("#### 🎥 Live Preview")
             snapshot_placeholder = st.empty()
 
         with col2:
-            st.markdown("📊 Image Analysis")
+            st.markdown("### 📊 Statistics")
             live_count = st.empty()
             live_max = st.empty()
             live_frames = st.empty()
@@ -270,8 +265,6 @@ else:
         frame_count = 0
         max_people = 0
         last_frame = None
-        frames_since_preview = 0
-        PREVIEW_UPDATE_EVERY = 10  # Show preview video every N processed frames
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -281,7 +274,6 @@ else:
             frame_id += 1
             if frame_id % FRAME_SKIP != 0:
                 out.write(frame)
-                preview_writer.write(frame)
                 continue
 
             frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
@@ -317,33 +309,20 @@ else:
             )
 
             out.write(output)
-            preview_writer.write(output)
             last_frame = output.copy()
-            frames_since_preview += 1
 
-            # Update snapshot every frame for immediate feedback
+            # Show latest frame snapshot
             snapshot_placeholder.image(
                 output,
                 channels="BGR",
                 use_container_width=True,
-                caption=f"Latest frame: {frame_id} - {count} people detected",
+                caption=f"Processing frame {frame_id}/{MAX_FRAMES}",
             )
 
-            # Update preview video periodically
-            if frames_since_preview >= PREVIEW_UPDATE_EVERY:
-                preview_writer.release()
-                with open(temp_preview_path, "rb") as f:
-                    preview_video.video(f.read(), start_time=0)
-                # Reopen writer
-                preview_writer = cv2.VideoWriter(
-                    temp_preview_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h)
-                )
-                frames_since_preview = 0
-
-            # Update stats in real-time
-            live_count.metric("👥 Current Count", count)
-            live_max.metric("📈 Peak Count", max_people)
-            live_frames.metric("🎞️ Frames Done", frame_count)
+            # Update stats
+            live_count.metric("Current Count", count)
+            live_max.metric("Peak Count", max_people)
+            live_frames.metric("Frames Done", frame_count)
             live_crowd.markdown(
                 f'<div style="margin-top:1rem;"><strong>Crowd Level:</strong><br><div class="badge {badge}" style="margin-top:0.5rem;">{label}</div></div>',
                 unsafe_allow_html=True,
@@ -355,42 +334,62 @@ else:
 
         cap.release()
         out.release()
-        preview_writer.release()
         os.remove(tfile.name)
 
         # Calculate average
         avg_people = round(total_people / frame_count) if frame_count > 0 else 0
         avg_label, avg_badge = classify_crowd(avg_people)
 
-        # Clear temporary UI
+        # Clear processing UI
         status_text.empty()
         progress_bar.empty()
-        preview_video.empty()
         snapshot_placeholder.empty()
 
         st.success("Video processed successfully!")
 
-        # Show final video
-        with col1:
-            st.markdown("#### 📹 Final Processed Video")
-            with open(out_path, "rb") as f:
-                st.video(f.read())
+        # Final results with download option
+        col1, col2 = st.columns([2, 1])
 
-        # Update final stats
+        with col1:
+            st.markdown("Download Processed Video")
+
+            # Read the processed video file
+            with open(out_path, "rb") as f:
+                video_bytes = f.read()
+
+            # Download button
+            st.download_button(
+                label="Download Video with Detections",
+                data=video_bytes,
+                file_name=f"crowd_detection_{timestamp}.mp4",
+                mime="video/mp4",
+                use_container_width=True,
+            )
+
+            st.info("Click the button above to download your processed video")
+
+            # Optional: Show preview of last frame
+            if last_frame is not None:
+                with st.expander("Preview Last Frame"):
+                    st.image(
+                        last_frame,
+                        channels="BGR",
+                        caption="Last processed frame with detections",
+                    )
+
         with col2:
-            live_count.metric("Average Count", avg_people)
-            live_max.metric("Total Count", max_people)
-            live_frames.metric("Total Frames", frame_count)
-            live_crowd.markdown(
-                f'<div style="margin-top:1rem;"><strong>Average Crowd:</strong><br><div class="badge {avg_badge}" style="margin-top:0.5rem;">{avg_label}</div></div>',
+            st.markdown("📊 Video Analysis")
+            st.metric("Average Count", avg_people)
+            st.metric("Total Count", max_people)
+            st.metric("Total Frames", frame_count)
+            st.markdown(
+                f'<div style="margin-top:1.5rem;"><strong>Average Crowd Level:</strong><br><div class="badge {avg_badge}" style="margin-top:0.5rem;">{avg_label}</div></div>',
                 unsafe_allow_html=True,
             )
 
-        # Cleanup temp preview
-        try:
-            os.remove(temp_preview_path)
-        except:
-            pass
+            # File info
+            file_size = len(video_bytes) / (1024 * 1024)  # Convert to MB
+            st.metric("📦 File Size", f"{file_size:.2f} MB")
 
 
 # THEME STYLING
