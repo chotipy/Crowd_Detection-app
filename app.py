@@ -178,6 +178,7 @@ if input_type == "Image":
     file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
     if file:
         img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+
         frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
 
         results = model.predict(
@@ -192,9 +193,7 @@ if input_type == "Image":
             st.image(output, channels="BGR")
         with col2:
             st.metric("People Count", count)
-            st.markdown(
-                f'<span class="badge {badge}">{label}</span>', unsafe_allow_html=True
-            )
+            st.markdown(f"**Crowd Level:** {label}")
 
         path = save_screenshot(output, "image")
         st.success(f"Screenshot saved: {path}")
@@ -202,13 +201,28 @@ if input_type == "Image":
 # VIDEO MODE
 else:
     vid = st.file_uploader("Upload Video", ["mp4", "avi", "mov"])
+
     if vid:
+        # Save temp input video
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(vid.read())
+        tfile.flush()
+        tfile.close()
 
         cap = cv2.VideoCapture(tfile.name)
-        stframe = st.empty()
-        last_frame = None
+
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        # Output video
+        out_path = f"output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
+
+        progress = st.progress(0)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        current = 0
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -216,13 +230,13 @@ else:
                 break
 
             frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
+
             results = model.predict(
                 frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
             )[0]
 
             output, count = draw_boxes(frame.copy(), results, conf_thres)
             label, _ = classify_crowd(count)
-            last_frame = output.copy()
 
             cv2.putText(
                 output,
@@ -234,15 +248,22 @@ else:
                 2,
             )
 
-            stframe.image(output, channels="BGR")
+            out.write(output)
+
+            current += 1
+            progress.progress(min(current / frame_count, 1.0))
 
         cap.release()
+        out.release()
         os.remove(tfile.name)
 
-        if last_frame is not None:
-            path = save_screenshot(last_frame, "video")
-            st.success(f"Screenshot saved: {path}")
+        st.success("Video processing complete!")
 
+        st.video(out_path)
+
+        final_frame = cv2.imread(out_path)
+        if final_frame is not None:
+            save_screenshot(final_frame, "video")
 
 # THEME STYLING
 if theme_mode == "Light":
