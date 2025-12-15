@@ -104,7 +104,7 @@ def draw_boxes(image, results, conf):
     return image, count
 
 
-st.table(classify_crowd, border=horizontal, border_color=[Green, Yellow, Red])
+st.table(classify_crowd)
 
 # SIDEBAR
 st.sidebar.header("🎛️ Application Demo")
