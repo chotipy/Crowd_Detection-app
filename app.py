@@ -314,7 +314,7 @@ else:
 
             # Update progress
             progress_bar.progress(min(frame_id / MAX_FRAMES, 1.0))
-            status_text.text(f"⚙️ Processing frame {frame_id}/{MAX_FRAMES}")
+            status_text.text(f"Processing frame {frame_id}/{MAX_FRAMES}")
 
         cap.release()
         out.release()
