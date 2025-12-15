@@ -1,4 +1,4 @@
-# CCTV Crowd Detection using YOLOv8 - Complete Code Explanation
+# Crowd Detection & Density Classification using YOLOv8 - Complete Code Explanation
 
 ## Overview
 
@@ -137,7 +137,7 @@ This mode is suitable for quick analysis and demonstration.
 
 ---
 
-## Section 8: Video Inference Mode (Cloud-Safe)
+## Section 8: Video Inference Mode
 
 To ensure stability on Streamlit Cloud, video processing is optimized with the following constraints:
 
