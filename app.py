@@ -417,7 +417,6 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: {text_secondary};
-        margin-bottom: 1rem;
     }}
 
     section[data-testid="stSidebar"] h2 {{
@@ -426,7 +425,6 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: {text_secondary};
-        margin-bottom: 1rem;
     }}
 
     section[data-testid="stSidebar"] h3 {{
