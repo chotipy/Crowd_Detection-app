@@ -334,7 +334,7 @@ else:
         with col2:
             st.subheader("📊 Video Analysis")
             st.metric("Average People Count", avg_people)
-            st.metric("Total People Count", total_people)
+            st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
             st.markdown(
                 f"""
