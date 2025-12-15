@@ -222,6 +222,8 @@ if input_type == "Image":
         padding:0.75rem 1rem;
         border-radius:0.75rem;
         background:rgba(0,0,0,0.03);
+        margin-top:0.5rem;
+        margin-bottom:1.25rem; 
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
         <span class="badge {badge}">{label}</span>
@@ -368,6 +370,8 @@ else:
         padding:0.75rem 1rem;
         border-radius:0.75rem;
         background:rgba(0,0,0,0.03);
+        margin-top:0.5rem;
+        margin-bottom:1.25rem; 
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
         <span class="badge {avg_badge}">{avg_label}</span>
@@ -378,7 +382,7 @@ else:
 
             # File info
             file_size = len(video_bytes) / (1024 * 1024)  # Convert to MB
-            st.metric("📦 File Size", f"{file_size:.2f} MB")
+            st.metric("File Size", f"{file_size:.2f} MB")
 
 
 # THEME STYLING
