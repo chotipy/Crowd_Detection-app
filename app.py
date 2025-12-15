@@ -238,6 +238,15 @@ if input_type == "Image":
                 unsafe_allow_html=True,
             )
 
+        # Download button
+        st.download_button(
+            label="Download Image with Detections",
+            data=output,
+            file_name=f"crowd_detection_{timestamp}.png",
+            mime="image/png",
+            use_container_width=True,
+        )
+
 # VIDEO MODE
 else:
     vid = st.file_uploader(
