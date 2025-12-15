@@ -106,10 +106,9 @@ def draw_boxes(image, results, conf):
 
 
 # DISPLAY TABLE
-
 st.markdown(
     """
-<table style="width:50%; border-collapse:collapse;">
+<table style="width:50%; border-collapse:collapse;justify-content:space-between;align-items:center;">
 <tr>
     <th>People Count</th>
     <th>Crowd Label</th>
