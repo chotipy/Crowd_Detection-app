@@ -222,7 +222,6 @@ if input_type == "Image":
         padding:0.75rem 1rem;
         border-radius:0.75rem;
         background:rgba(0,0,0,0.03);
-        margin-top:0.5rem;
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
         <span class="badge {badge}">{label}</span>
@@ -369,7 +368,6 @@ else:
         padding:0.75rem 1rem;
         border-radius:0.75rem;
         background:rgba(0,0,0,0.03);
-        margin-top:0.5rem;
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
         <span class="badge {avg_badge}">{avg_label}</span>
