@@ -214,7 +214,21 @@ if input_type == "Image":
             st.subheader("📊 Image Analysis")
             st.metric("People Count", count)
             st.markdown(
-                f'<div class="badge {badge}">{label}</div>', unsafe_allow_html=True
+                f"""
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:0.75rem 1rem;
+        border-radius:0.75rem;
+        background:rgba(0,0,0,0.03);
+        margin-top:0.5rem;
+    ">
+        <span style="font-weight:600;">Average Crowd Level</span>
+        <span class="badge {avg_badge}">{avg_label}</span>
+    </div>
+    """,
+                unsafe_allow_html=True,
             )
 
 # VIDEO MODE
