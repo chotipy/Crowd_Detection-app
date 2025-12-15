@@ -281,7 +281,7 @@ else:
         os.remove(tfile.name)
 
         st.success("Video processed successfully!")
-        # Read video as bytes (Cloud-safe)
+
         with open(out_path, "rb") as f:
             video_bytes = f.read()
 
