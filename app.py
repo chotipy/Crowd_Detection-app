@@ -228,7 +228,7 @@ else:
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         MAX_FRAMES = 200
-        FRAME_SKIP = 4
+        FRAME_SKIP = 1
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_path = f"processed_video_{timestamp}.mp4"
