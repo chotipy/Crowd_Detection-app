@@ -2,6 +2,6 @@ streamlit>=1.32
 numpy<2
 opencv-python-headless
 ultralytics
-torch
-torchvision
+torch>=2.0,<3.0
+torchvision>=0.15,<1.0
 Pillow
