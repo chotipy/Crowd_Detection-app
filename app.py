@@ -241,17 +241,17 @@ else:
 
         out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
-        st.info("⏳ Processing video...")
+        st.info("Processing video...")
 
         # Create layout
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            st.markdown("#### 🎥 Live Preview")
+            st.markdown("Live Preview")
             snapshot_placeholder = st.empty()
 
         with col2:
-            st.markdown("### 📊 Statistics")
+            st.markdown("Statistics")
             live_count = st.empty()
             live_max = st.empty()
             live_frames = st.empty()
