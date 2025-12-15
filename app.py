@@ -346,7 +346,7 @@ else:
             st.metric("Average Count", avg_people)
             st.metric("Total Count", max_people)
             st.metric("Total Frames", frame_count)
-            sst.markdown(
+            st.markdown(
                 f"""
     <div style="
         display: flex;
