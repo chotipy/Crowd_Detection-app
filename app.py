@@ -6,6 +6,7 @@ from datetime import datetime
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 
 import cv2
+import pandas as pd
 import numpy as np
 from ultralytics import YOLO
 
@@ -104,7 +105,17 @@ def draw_boxes(image, results, conf):
     return image, count
 
 
-st.table(classify_crowd)
+# DISPLAY TABLE
+data = {
+    "People Count": ["≤ 3", "4 – 30", "> 30"],
+    "Crowd Label": ["Few", "Medium", "Crowded"],
+    "Badge Color": ["Green", "Yellow", "Red"],
+}
+
+df = pd.DataFrame(data)
+
+with st.expander("Crowd Density Reference"):
+    st.dataframe(df, use_container_width=True)
 
 # SIDEBAR
 st.sidebar.header("🎛️ Application Demo")
