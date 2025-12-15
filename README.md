@@ -5,12 +5,6 @@
 This project implements a **complete crowd detection and crowd density classification system** using **YOLOv8** integrated into a **Streamlit web application**.
 The system detects people in **indoor CCTV images and short video footage**, counts the number of detected individuals, and classifies crowd density levels into **Sedikit (Low), Sedang (Medium), and Ramai (High)**.
 
-The application is designed to be:
-
-* Interactive and user-friendly
-* Safe to deploy on **Streamlit Cloud**
-* Suitable for **academic final projects**
-
 ---
 
 ## Section 1: Environment Setup
