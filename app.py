@@ -311,11 +311,22 @@ else:
             st.subheader("📊 Video Analysis")
             st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
-            st.markdown(f"**Average Crowd Level:**")
             st.markdown(
-                f'<div class="badge {avg_badge}">{avg_label}</div>',
+                f"""
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    ">
+        <span style="font-weight:600;">Average Crowd Level:</span>
+        <div class="badge {avg_badge}">{avg_label}</div>
+    </div>
+    """,
                 unsafe_allow_html=True,
             )
+
 
 # THEME STYLING
 if theme_mode == "Light":
