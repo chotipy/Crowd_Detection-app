@@ -247,7 +247,7 @@ if input_type == "Image":
                     margin-top:0.75rem;
                     margin-bottom:1.25rem;
                 ">
-                    <span style="font-weight:600;">Crowd Density</span>
+                    <span style="font-weight:600;">Average Crowd Level</span>
                     <span class="badge {badge}">{label}</span>
                 </div>
                 """,
@@ -258,7 +258,7 @@ if input_type == "Image":
         success, encoded_img = cv2.imencode(".png", output)
         if success:
             st.download_button(
-                label="⬇️ Download Image with Detections",
+                label="Download Image with Detections",
                 data=encoded_img.tobytes(),
                 file_name=f"crowd_detection_{timestamp}.png",
                 mime="image/png",
