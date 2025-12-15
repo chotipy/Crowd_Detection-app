@@ -193,59 +193,80 @@ max_det = st.sidebar.slider(
 
 # IMAGE MODE
 if input_type == "Image":
-    file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
+    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
 
-    if file:
-        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    if uploaded_file is not None:
+        # Decode image
+        img = cv2.imdecode(
+            np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR
+        )
+
+        if img is None:
+            st.error("Failed to read image file.")
+            st.stop()
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        frame = preprocess_frame(img, enable_preprocess, gamma_val, blur_k)
 
+        # Preprocess
+        frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
+
+        # Model
         results = model.predict(
             frame,
             conf=conf_thres,
             iou=iou_thres,
             max_det=max_det,
             device="cpu",
-            verbose=False,
             imgsz=640,
+            verbose=False,
         )[0]
 
+        # Draw results
         output, count = draw_boxes(frame.copy(), results, conf_thres)
         label, badge = classify_crowd(count)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.image(output, channels="BGR")
-        with col2:
-            st.header("📊 Image Analysis")
+        # DISPLAY
+        col_img, col_info = st.columns([1.4, 1])
+
+        with col_img:
+            st.image(output, channels="BGR", caption="Detection Result")
+
+        with col_info:
+            st.subheader("📊 Image Analysis")
             st.metric("People Count", count)
+
             st.markdown(
                 f"""
-    <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:0.75rem 1rem;
-        border-radius:0.75rem;
-        background:rgba(0,0,0,0.03);
-        margin-top:0.5rem;
-        margin-bottom:1.25rem; 
-    ">
-        <span style="font-weight:600;">Average Crowd Level</span>
-        <span class="badge {badge}">{label}</span>
-    </div>
-    """,
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    padding:0.75rem 1rem;
+                    border-radius:0.75rem;
+                    background:rgba(0,0,0,0.03);
+                    margin-top:0.75rem;
+                    margin-bottom:1.25rem;
+                ">
+                    <span style="font-weight:600;">Crowd Density</span>
+                    <span class="badge {badge}">{label}</span>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
 
-        # Download button
-        st.download_button(
-            label="Download Image with Detections",
-            data=output,
-            file_name=f"crowd_detection_{timestamp}.png",
-            mime="image/png",
-            use_container_width=True,
-        )
+        # DOWNLOAD BUTTON
+        success, encoded_img = cv2.imencode(".png", output)
+        if success:
+            st.download_button(
+                label="⬇️ Download Image with Detections",
+                data=encoded_img.tobytes(),
+                file_name=f"crowd_detection_{timestamp}.png",
+                mime="image/png",
+                use_container_width=True,
+            )
+        else:
+            st.warning("Failed to prepare image for download.")
+
 
 # VIDEO MODE
 else:
