@@ -351,11 +351,11 @@ else:
     <div style="
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.25rem;
         margin-top: 0.5rem;
         margin-bottom: 0.75rem;
     ">
-        <span style="font-weight:600;">Average Crowd Level:</span>
+        <span style="font-weight:600;">Average Crowd Level</span>
         <div class="badge {avg_badge}">{avg_label}</div>
     </div>
     """,
