@@ -311,6 +311,15 @@ else:
 
         st.success("Video processed successfully!")
 
+        # Show preview of last frame
+        if last_frame is not None:
+            with st.expander("Preview Last Frame"):
+                st.image(
+                    last_frame,
+                    channels="BGR",
+                    caption="Last processed frame with detections",
+                )
+
         # Final results with download option
         col1, col2 = st.columns([2, 1])
 
@@ -332,22 +341,24 @@ else:
 
             st.info("Click the button above to download your processed video")
 
-            # Optional: Show preview of last frame
-            if last_frame is not None:
-                with st.expander("Preview Last Frame"):
-                    st.image(
-                        last_frame,
-                        channels="BGR",
-                        caption="Last processed frame with detections",
-                    )
-
         with col2:
             st.markdown("📊 Video Analysis")
             st.metric("Average Count", avg_people)
             st.metric("Total Count", max_people)
             st.metric("Total Frames", frame_count)
-            st.markdown(
-                f'<div style="margin-top:1.5rem;"><strong>Average Crowd Level:</strong><br><div class="badge {avg_badge}" style="margin-top:0.5rem;">{avg_label}</div></div>',
+            sst.markdown(
+                f"""
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    ">
+        <span style="font-weight:600;">Average Crowd Level:</span>
+        <div class="badge {avg_badge}">{avg_label}</div>
+    </div>
+    """,
                 unsafe_allow_html=True,
             )
 
