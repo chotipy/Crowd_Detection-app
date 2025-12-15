@@ -243,20 +243,6 @@ else:
 
         st.info("Processing video...")
 
-        # Create layout
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.markdown("Live Preview")
-            snapshot_placeholder = st.empty()
-
-        with col2:
-            st.markdown("Statistics")
-            live_count = st.empty()
-            live_max = st.empty()
-            live_frames = st.empty()
-            live_crowd = st.empty()
-
         progress_bar = st.progress(0)
         status_text = st.empty()
 
@@ -311,23 +297,6 @@ else:
             out.write(output)
             last_frame = output.copy()
 
-            # Show latest frame snapshot
-            snapshot_placeholder.image(
-                output,
-                channels="BGR",
-                use_container_width=True,
-                caption=f"Processing frame {frame_id}/{MAX_FRAMES}",
-            )
-
-            # Update stats
-            live_count.metric("Current Count", count)
-            live_max.metric("Peak Count", max_people)
-            live_frames.metric("Frames Done", frame_count)
-            live_crowd.markdown(
-                f'<div style="margin-top:1rem;"><strong>Crowd Level:</strong><br><div class="badge {badge}" style="margin-top:0.5rem;">{label}</div></div>',
-                unsafe_allow_html=True,
-            )
-
             # Update progress
             progress_bar.progress(min(frame_id / MAX_FRAMES, 1.0))
             status_text.text(f"⚙️ Processing frame {frame_id}/{MAX_FRAMES}")
@@ -339,11 +308,6 @@ else:
         # Calculate average
         avg_people = round(total_people / frame_count) if frame_count > 0 else 0
         avg_label, avg_badge = classify_crowd(avg_people)
-
-        # Clear processing UI
-        status_text.empty()
-        progress_bar.empty()
-        snapshot_placeholder.empty()
 
         st.success("Video processed successfully!")
 
