@@ -65,11 +65,21 @@ The system is composed of three main components:
 
 ### YOLOv8 Model
 
-The project uses a **YOLOv8-based person detection model** trained on a crowd dataset.
+YOLOv8 (You Only Look Once version 8) is a single-stage object detection model that performs object localization and classification in one forward pass of the network. This design enables efficient inference while maintaining high detection accuracy, making YOLOv8 suitable for real-time and near real-time applications. In this project, YOLOv8 is used to detect persons in indoor CCTV images and videos.
 
-* **Detected class:** `person` (class ID = 0)
-* **Input size:** 640 × 640
-* **Inference device:** CPU (for cloud compatibility)
+### Detection Formulation
+
+Given an input image I of size H × W × 3, YOLOv8 predicts a set of bounding boxes:
+
+B = {(x_i, y_i, w_i, h_i, c_i)}, for i = 1 … N
+
+where:
+- (x_i, y_i) are the bounding box center coordinates
+- w_i and h_i are the width and height
+- c_i is the confidence score
+- N is the number of predicted boxes
+
+Overlapping boxes are filtered using Non-Maximum Suppression (NMS) based on IoU.
 
 The model is loaded once using Streamlit’s caching mechanism to improve performance and prevent redundant loading.
 
