@@ -211,7 +211,7 @@ if input_type == "Image":
         with col1:
             st.image(output, channels="BGR")
         with col2:
-            st.subheader("Image Analysis")
+            st.subheader("📊 Image Analysis")
             st.metric("People Count", count)
             st.markdown(
                 f'<div class="badge {badge}">{label}</div>', unsafe_allow_html=True
@@ -239,7 +239,7 @@ else:
         out_path = "output_cloud.mp4"
         out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
-        st.info("Processing video (cloud-safe mode)…")
+        st.info("Processing video.…")
         progress = st.progress(0)
 
         frame_id = 0
@@ -308,10 +308,9 @@ else:
                 st.video(f.read())
 
         with col2:
-            st.subheader("Video Analysis")
+            st.subheader("📊 Video Analysis")
             st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
-            st.markdown(f"**Average Crowd Level:** {avg_label}")
             st.markdown(
                 f'<div class="badge {avg_badge}">{avg_label}</div>',
                 unsafe_allow_html=True,
@@ -450,7 +449,7 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-top: 1rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
     }}
 
     .low {{ 
