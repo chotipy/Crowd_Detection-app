@@ -133,7 +133,11 @@ In **Image Mode**, the system:
    * Total people count
    * Crowd density badge (color-coded)
 
-This mode is suitable for quick analysis and demonstration.
+| Crowd Level | Bahasa      | Color     | Description                                                                                                   |
+| ----------- | ----------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| **Low**     | **Sedikit** | 🟢 Green  | Indicates a small number of people. The area is relatively empty and safe.                                    |
+| **Medium**  | **Sedang**  | 🟡 Yellow | Indicates a moderate crowd level. Normal activity is present, but monitoring is recommended.                  |
+| **High**    | **Ramai**   | 🔴 Red    | Indicates a high crowd density. The area is crowded and may require attention for safety or capacity control. |
 
 ---
 
