@@ -1,4 +1,4 @@
-# YOLOv8 Crowd Detection – Complete Code Explanation
+# CCTV Crowd Detection using YOLOv8 - Complete Code Explanation
 
 ## Overview
 
@@ -253,5 +253,3 @@ This project demonstrates a **complete applied deep learning workflow**, integra
 * YOLOv8-based object detection
 * Interactive web-based visualization
 * Practical deployment considerations
-
-The system is suitable for **final academic projects**, **demonstrations**, and **future research extensions**.
