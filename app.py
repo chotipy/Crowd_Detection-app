@@ -1,16 +1,22 @@
 import streamlit as st
 import os
+import sys
 
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
-import cv2
-import numpy as np
-from ultralytics import YOLO
-import tempfile
-from datetime import datetime
+
+# Add error handling for imports
+try:
+    import cv2
+    import numpy as np
+    from ultralytics import YOLO
+    import tempfile
+    from datetime import datetime
+except ImportError as e:
+    st.error(f"Missing required package: {e}")
+    st.stop()
 
 # CONFIG
 st.set_page_config(page_title="Crowd Detection using YOLOv8", layout="wide")
-theme_mode = "Light"
 
 # HEADER
 st.markdown(
@@ -51,35 +57,65 @@ st.markdown(
 )
 
 
-# LOAD MODEL
-@st.cache_resource
+# LOAD MODEL with proper error handling
+@st.cache_resource(show_spinner="Loading YOLO model..")
 def load_model():
-    return YOLO(os.path.join("model", "best.pt")).to("cpu")  # Supaya ga crash lagi
+    try:
+        model_path = os.path.join("model", "best.pt")
+
+        # Check if model exists
+        if not os.path.exists(model_path):
+            st.error(f"No model file not found at: {model_path}")
+            st.info("Please ensure 'model/best.pt' exists in your repository")
+            return None
+
+        # Load model with minimal settings for cloud environment
+        model = YOLO(model_path)
+        model.to("cpu")
+
+        # Warm up with a small dummy prediction to verify model works
+        dummy = np.zeros((640, 640, 3), dtype=np.uint8)
+        _ = model.predict(dummy, verbose=False, imgsz=640)
+
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        st.info(
+            "Possible solutions:\n- Ensure ultralytics is installed\n- Check model file integrity\n- Verify sufficient memory"
+        )
+        return None
 
 
-model = load_model()
+# LOADING STATUS
+with st.spinner("Initializing model.."):
+    model = load_model()
+
+if model is None:
+    st.error("⚠️ Cannot proceed without a valid model. Please fix the issues above.")
+    st.stop()
 
 
 # PREPROCESSING
-def gamma_correction(image, gamma):  # Mencerahkan gambar yang gelap
+def gamma_correction(image, gamma):
     inv = 1.0 / gamma
     table = np.array([((i / 255.0) ** inv) * 255 for i in range(256)]).astype("uint8")
     return cv2.LUT(image, table)
 
 
-# CALL PREPROCESSING
 def preprocess_frame(frame, enable, gamma, blur_k):
     if not enable:
         return frame
-    frame = gamma_correction(frame, gamma)
-    frame = cv2.GaussianBlur(
-        frame, (blur_k, blur_k), 1.0
-    )  # Mengurangi noise karena kita pakai lighting indoor
-    return frame
+    try:
+        frame = gamma_correction(frame, gamma)
+        frame = cv2.GaussianBlur(frame, (blur_k, blur_k), 1.0)
+        return frame
+    except Exception as e:
+        st.warning(f"Preprocessing error: {e}")
+        return frame
 
 
 # UTILS
-def classify_crowd(count):  # Mapping jumlah orang
+def classify_crowd(count):
     if count <= 3:
         return "Sedikit", "low"
     elif count <= 30:
@@ -88,21 +124,30 @@ def classify_crowd(count):  # Mapping jumlah orang
         return "Ramai", "high"
 
 
-def draw_boxes(image, results, conf):  # Output kotak pada image
+def draw_boxes(image, results, conf):
     count = 0
-    for box in results.boxes:
-        if int(box.cls[0]) == 0 and float(box.conf[0]) >= conf:
-            count += 1
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            cv2.rectangle(image, (x1, y1), (x2, y2), (99, 112, 116), 2)
+    try:
+        for box in results.boxes:
+            if int(box.cls[0]) == 0 and float(box.conf[0]) >= conf:
+                count += 1
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cv2.rectangle(image, (x1, y1), (x2, y2), (99, 112, 116), 2)
+    except Exception as e:
+        st.warning(f"Drawing boxes error: {e}")
     return image, count
 
 
-def save_screenshot(image, prefix):  # Save screenshot
-    os.makedirs("screenshots", exist_ok=True)
-    filename = f"screenshots/{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    cv2.imwrite(filename, image)
-    return filename
+def save_screenshot(image, prefix):
+    try:
+        os.makedirs("screenshots", exist_ok=True)
+        filename = (
+            f"screenshots/{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        )
+        cv2.imwrite(filename, image)
+        return filename
+    except Exception as e:
+        st.warning(f"Failed to save screenshot: {e}")
+        return None
 
 
 # SIDEBAR
@@ -125,14 +170,14 @@ gamma_val = st.sidebar.slider(
     value=1.2,
     step=0.1,
     help="Increase gamma to brighten low light indoor CCTV images",
-)  # Untuk mengatur seberapa cerah gambar
+)
 
 blur_k = st.sidebar.selectbox(
     "Gaussian Blur Kernel",
     [3, 5, 7],
     index=1,
-    help=("To reduce noise in low light circumstances"),
-)  # Untuk reduce noise di low light karena indoor
+    help="To reduce noise in low light circumstances",
+)
 
 st.sidebar.divider()
 st.sidebar.subheader("⚙️ Inference Settings")
@@ -144,12 +189,8 @@ conf_thres = st.sidebar.slider(
     max_value=0.9,
     value=0.5,
     step=0.05,
-    help=(
-        "Minimum confidence score required to display a detection\n\n"
-        "Low value = more detections but may include false positives\n\n"
-        "High value = fewer but usually more reliable detections"
-    ),
-)  # Atur sensitivitas detection
+    help="Minimum confidence score required to display a detection",
+)
 
 iou_thres = st.sidebar.slider(
     "IoU Threshold",
@@ -157,12 +198,8 @@ iou_thres = st.sidebar.slider(
     max_value=0.8,
     value=0.6,
     step=0.05,
-    help=(
-        "Controls how overlapping bounding boxes are merged\n\n"
-        "Lower IoU = stricter suppression\n\n"
-        "Higher IoU = allows more overlapping boxes\n"
-    ),
-)  # Atur overlap antar bounding box
+    help="Controls how overlapping bounding boxes are merged",
+)
 
 max_det = st.sidebar.slider(
     "Max Detections",
@@ -170,33 +207,49 @@ max_det = st.sidebar.slider(
     500,
     300,
     50,
-    help=("Maximum of object that you want to detect?"),
-)  # Batas maksimum objek yang dapat terdeteksi
+    help="Maximum of object that you want to detect?",
+)
 
 # IMAGE MODE
 if input_type == "Image":
     file = st.file_uploader("Upload Image", ["jpg", "png", "jpeg"])
     if file:
-        img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+        try:
+            img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
 
-        frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
+            if img is None:
+                st.error("Failed to decode image. Please upload a valid image file.")
+                st.stop()
 
-        results = model.predict(
-            frame, conf=conf_thres, iou=iou_thres, max_det=max_det, verbose=False
-        )[0]
+            frame = preprocess_frame(img.copy(), enable_preprocess, gamma_val, blur_k)
 
-        output, count = draw_boxes(frame.copy(), results, conf_thres)
-        label, badge = classify_crowd(count)
+            with st.spinner("Running detection..."):
+                results = model.predict(
+                    frame,
+                    conf=conf_thres,
+                    iou=iou_thres,
+                    max_det=max_det,
+                    verbose=False,
+                    imgsz=640,  # Fixed size for consistency
+                )[0]
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.image(output, channels="BGR")
-        with col2:
-            st.metric("People Count", count)
-            st.markdown(f"**Crowd Level:** {label}")
+            output, count = draw_boxes(frame.copy(), results, conf_thres)
+            label, badge = classify_crowd(count)
 
-        path = save_screenshot(output, "image")
-        st.success(f"Screenshot saved: {path}")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.image(output, channels="BGR")
+            with col2:
+                st.metric("People Count", count)
+                st.markdown(f"**Crowd Level:** {label}")
+
+            path = save_screenshot(output, "image")
+            if path:
+                st.success(f"Screenshot saved: {path}")
+
+        except Exception as e:
+            st.error(f"Error processing image: {str(e)}")
+            st.exception(e)
 
 # VIDEO MODE
 else:
@@ -205,87 +258,126 @@ else:
     )
 
     if vid:
-        # Save temp input video
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(vid.read())
-        tfile.flush()
-        tfile.close()
+        try:
+            # Save temp input video
+            tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+            tfile.write(vid.read())
+            tfile.flush()
+            tfile.close()
 
-        cap = cv2.VideoCapture(tfile.name)
+            cap = cv2.VideoCapture(tfile.name)
 
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            if not cap.isOpened():
+                st.error("Failed to open video file. Please upload a valid video.")
+                os.remove(tfile.name)
+                st.stop()
 
-        # Cloud-safe limits
-        MAX_FRAMES = 300  # ~10 seconds @ 30 FPS
-        FRAME_SKIP = 3  # Process every 3rd frame
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-        # Output video
-        out_path = f"output_cloud_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
+            # Cloud-safe limits
+            MAX_FRAMES = min(300, total_frames)  # ~10 seconds @ 30 FPS
+            FRAME_SKIP = 3  # Process every 3rd frame
 
-        st.info("Processing Your Video..")
-        progress = st.progress(0)
+            # Output video
+            out_path = f"output_cloud_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
 
-        frame_id = 0
-        processed = 0
+            if not out.isOpened():
+                st.error("Failed to create output video writer.")
+                cap.release()
+                os.remove(tfile.name)
+                st.stop()
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            frame_id += 1
-            if frame_id > MAX_FRAMES:
-                break
-
-            # Skip frames to reduce load
-            if frame_id % FRAME_SKIP != 0:
-                out.write(frame)
-                continue
-
-            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
-
-            # YOLO inference
-            results = model.predict(
-                frame,
-                conf=conf_thres,
-                iou=iou_thres,
-                max_det=min(max_det, 100),  # hard limit
-                device="cpu",
-                verbose=False,
-            )[0]
-
-            output, count = draw_boxes(frame.copy(), results, conf_thres)
-            label, _ = classify_crowd(count)
-
-            cv2.putText(
-                output,
-                f"People: {count} | Crowd: {label}",
-                (20, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.9,
-                (255, 255, 255),
-                2,
+            st.info(
+                f"Processing video: {total_frames} frames, processing every {FRAME_SKIP}rd frame..."
             )
+            progress = st.progress(0)
 
-            out.write(output)
-            processed += 1
+            frame_id = 0
+            processed = 0
 
-            progress.progress(min(frame_id / MAX_FRAMES, 1.0))
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-        cap.release()
-        out.release()
-        os.remove(tfile.name)
+                frame_id += 1
+                if frame_id > MAX_FRAMES:
+                    st.warning(f"Stopped at {MAX_FRAMES} frames to prevent timeout")
+                    break
 
-        st.success("Video processed successfully!")
+                # Skip frames to reduce load
+                if frame_id % FRAME_SKIP != 0:
+                    out.write(frame)
+                    continue
 
-        with open(out_path, "rb") as f:
-            video_bytes = f.read()
+                frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
 
-        st.video(video_bytes)
+                # YOLO inference
+                results = model.predict(
+                    frame,
+                    conf=conf_thres,
+                    iou=iou_thres,
+                    max_det=min(max_det, 100),
+                    device="cpu",
+                    verbose=False,
+                    imgsz=640,
+                )[0]
+
+                output, count = draw_boxes(frame.copy(), results, conf_thres)
+                label, _ = classify_crowd(count)
+
+                cv2.putText(
+                    output,
+                    f"People: {count} | Crowd: {label}",
+                    (20, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (255, 255, 255),
+                    2,
+                )
+
+                out.write(output)
+                processed += 1
+
+                progress.progress(min(frame_id / MAX_FRAMES, 1.0))
+
+            cap.release()
+            out.release()
+            os.remove(tfile.name)
+
+            st.success(f"Video processed successfully! ({processed} frames analyzed)")
+
+            if os.path.exists(out_path):
+                with open(out_path, "rb") as f:
+                    video_bytes = f.read()
+                st.video(video_bytes)
+
+                # Clean up output file after displaying
+                try:
+                    os.remove(out_path)
+                except:
+                    pass
+            else:
+                st.error("Output video file was not created")
+
+        except Exception as e:
+            st.error(f"Error processing video: {str(e)}")
+            st.exception(e)
+            # Cleanup
+            try:
+                if "cap" in locals():
+                    cap.release()
+                if "out" in locals():
+                    out.release()
+                if "tfile" in locals() and os.path.exists(tfile.name):
+                    os.remove(tfile.name)
+            except:
+                pass
 
 # THEME STYLING
 if theme_mode == "Light":
@@ -321,7 +413,6 @@ st.markdown(
         color: {text_color};
     }}
 
-    /* Sidebar Styling */
     section[data-testid="stSidebar"] {{
         background: {sidebar_bg};
         backdrop-filter: blur(20px);
@@ -365,7 +456,6 @@ st.markdown(
         color: {text_color};
     }}
 
-    /* Card Styling */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stImage"]),
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stMetric"]) {{
         background: {card_bg};
@@ -377,7 +467,6 @@ st.markdown(
         margin: 0.5rem 0;
     }}
 
-    /* Metric Styling */
     div[data-testid="stMetric"] {{
         background: transparent !important;
         padding: 0 !important;
@@ -400,7 +489,6 @@ st.markdown(
         color: {text_color};
     }}
 
-    /* Title Styling */
     h1 {{
         font-size: 2.5rem;
         font-weight: 700;
@@ -415,7 +503,6 @@ st.markdown(
         line-height: 1.6;
     }}
 
-    /* Badge Styling */
     .badge {{
         padding: 0.5rem 1.25rem;
         border-radius: 2rem;
@@ -445,7 +532,6 @@ st.markdown(
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }}
 
-    /* Button Styling */
     .stButton > button {{
         background: {card_bg};
         backdrop-filter: blur(20px);
@@ -463,7 +549,6 @@ st.markdown(
         box-shadow: {shadow};
     }}
 
-    /* File Uploader */
     div[data-testid="stFileUploader"] {{
         background: {card_bg};
         backdrop-filter: blur(20px);
@@ -478,7 +563,6 @@ st.markdown(
         color: {text_color};
     }}
 
-    /* Success Message */
     .stSuccess {{
         background: {card_bg};
         backdrop-filter: blur(20px);
@@ -488,7 +572,6 @@ st.markdown(
         font-size: 0.875rem;
     }}
 
-    /* Caption */
     .stCaption {{
         font-size: 0.75rem;
         color: {text_secondary};
@@ -496,14 +579,12 @@ st.markdown(
         margin-top: 2rem;
     }}
 
-    /* Divider */
     hr {{
         margin: 2rem 0;
         border: none;
         border-top: 1px solid {border_color};
     }}
 
-    /* Hide Streamlit branding */
     footer {{ visibility: hidden; }}
     #MainMenu {{ visibility: hidden; }}
     </style>
