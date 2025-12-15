@@ -272,7 +272,6 @@ else:
             label, _ = classify_crowd(count)
 
             # Track statistics
-            total_people += count
             frame_count += 1
             max_people = max(max_people, count)
 
@@ -308,9 +307,7 @@ else:
                 st.video(f.read())
 
         with col2:
-            st.subheader("📊 Video Statistics")
-            st.metric("Average People Count", avg_people)
-            st.metric("Peak People Count", max_people)
+            st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
             st.markdown(f"**Average Crowd Level:** {avg_label}")
             st.markdown(
