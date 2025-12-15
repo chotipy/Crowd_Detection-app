@@ -408,7 +408,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] > div {{
-        padding: 2rem 1.5rem;
+        padding: 1rem 1.5rem;
     }}
 
     section[data-testid="stSidebar"] h1 {{
