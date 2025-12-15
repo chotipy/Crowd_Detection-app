@@ -125,6 +125,12 @@ st.markdown(
     <td>&gt; 30</td>
     <td><b>Crowded</b></td>
 </tr>
+<style>
+.custom-table td {
+    color: #111 !important;
+    font-weight: 600;
+}
+</style>
 </table>
 """,
     unsafe_allow_html=True,
