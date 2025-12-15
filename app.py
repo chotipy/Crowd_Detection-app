@@ -107,18 +107,33 @@ def draw_boxes(image, results, conf):
 
 # DISPLAY TABLE
 
-st.markdown("---")
+st.markdown(
+    """
+<table style="width:100%; border-collapse:collapse;">
+<tr>
+    <th>People Count</th>
+    <th>Crowd Label</th>
+</tr>
+<tr style="background-color:#d1fae5;">
+    <td>≤ 3</td>
+    <td><b>Few</b></td>
+    <td>Green</td>
+</tr>
+<tr style="background-color:#fef3c7;">
+    <td>4 – 30</td>
+    <td><b>Medium</b></td>
+    <td>Yellow</td>
+</tr>
+<tr style="background-color:#fee2e2;">
+    <td>&gt; 30</td>
+    <td><b>Crowded</b></td>
+    <td>Red</td>
+</tr>
+</table>
+""",
+    unsafe_allow_html=True,
+)
 
-data = {
-    "People Count": ["≤ 3", "4 – 30", "> 30"],
-    "Crowd Label": ["Few", "Medium", "Crowded"],
-    "Badge Color": ["Green", "Yellow", "Red"],
-}
-
-df = pd.DataFrame(data)
-
-with st.expander("Crowd Density Reference", expanded=True):
-    st.dataframe(df, use_container_width=True)
 
 # SIDEBAR
 st.sidebar.header("🎛️ Application Demo")
