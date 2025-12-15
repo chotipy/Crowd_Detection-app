@@ -225,7 +225,7 @@ if input_type == "Image":
         margin-top:0.5rem;
     ">
         <span style="font-weight:600;">Average Crowd Level</span>
-        <span class="badge {avg_badge}">{avg_label}</span>
+        <span class="badge {badge}">{label}</span>
     </div>
     """,
                 unsafe_allow_html=True,
