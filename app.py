@@ -117,17 +117,14 @@ st.markdown(
 <tr style="background-color:#d1fae5;">
     <td>≤ 3</td>
     <td><b>Few</b></td>
-    <td>Green</td>
 </tr>
 <tr style="background-color:#fef3c7;">
     <td>4 – 30</td>
     <td><b>Medium</b></td>
-    <td>Yellow</td>
 </tr>
 <tr style="background-color:#fee2e2;">
     <td>&gt; 30</td>
     <td><b>Crowded</b></td>
-    <td>Red</td>
 </tr>
 </table>
 """,
