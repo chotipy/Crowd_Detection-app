@@ -308,7 +308,7 @@ else:
                 st.video(f.read())
 
         with col2:
-            st.header("Video Summary")
+            st.header("Here is your Video Summary!")
             st.metric("Total People Count", max_people)
             st.metric("Frames Analyzed", frame_count)
             st.markdown(f"**Average Crowd Level:** {avg_label}")
