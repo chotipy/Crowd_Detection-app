@@ -54,7 +54,7 @@ st.markdown(
 # LOAD MODEL
 @st.cache_resource
 def load_model():
-    return YOLO(os.path.join("model", "best.pt"))
+    return YOLO(os.path.join("model", "best.pt")).to("cpu")  # Supaya ga crash lagi
 
 
 model = load_model()
@@ -124,7 +124,7 @@ gamma_val = st.sidebar.slider(
     max_value=1.6,
     value=1.2,
     step=0.1,
-    help="Increase gamma to brighten low-light indoor CCTV images",
+    help="Increase gamma to brighten low light indoor CCTV images",
 )  # Untuk mengatur seberapa cerah gambar
 
 blur_k = st.sidebar.selectbox(
@@ -200,125 +200,89 @@ if input_type == "Image":
 
 # VIDEO MODE
 else:
-    vid = st.file_uploader("Upload Video", ["mp4", "avi", "mov"])
+    vid = st.file_uploader(
+        "Upload Video (Max 10 seconds recommended)", ["mp4", "avi", "mov"]
+    )
 
     if vid:
+        # Save temp input video
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(vid.read())
+        tfile.flush()
         tfile.close()
 
         cap = cv2.VideoCapture(tfile.name)
 
-        ret, first_frame = cap.read()
-        if not ret:
-            st.error("Failed to read video")
-            cap.release()
-            os.remove(tfile.name)
-            st.stop()
-
-        height, width, _ = first_frame.shape
-
         fps = cap.get(cv2.CAP_PROP_FPS)
-        if fps == 0 or np.isnan(fps):
-            fps = 25
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        out_path = f"output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+        # Cloud-safe limits
+        MAX_FRAMES = 300  # ~10 seconds @ 30 FPS
+        FRAME_SKIP = 3  # Process every 3rd frame
+
+        # Output video
+        out_path = f"output_cloud_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
 
-        st.subheader("📊 Detection Summary")
-        count_placeholder = st.empty()
-        badge_placeholder = st.empty()
-
+        st.info("Processing Your Video..")
         progress = st.progress(0)
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        current = 0
 
-        with st.spinner("Processing video, please wait..."):
-            frame = preprocess_frame(
-                first_frame.copy(),
-                enable_preprocess,
-                gamma_val,
-                blur_k,
-            )
+        frame_id = 0
+        processed = 0
 
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame_id += 1
+            if frame_id > MAX_FRAMES:
+                break
+
+            # Skip frames to reduce load
+            if frame_id % FRAME_SKIP != 0:
+                out.write(frame)
+                continue
+
+            frame = preprocess_frame(frame, enable_preprocess, gamma_val, blur_k)
+
+            # YOLO inference
             results = model.predict(
                 frame,
                 conf=conf_thres,
                 iou=iou_thres,
-                max_det=max_det,
+                max_det=min(max_det, 100),  # hard limit
+                device="cpu",
                 verbose=False,
             )[0]
 
             output, count = draw_boxes(frame.copy(), results, conf_thres)
-            label, badge = classify_crowd(count)
+            label, _ = classify_crowd(count)
 
             cv2.putText(
                 output,
                 f"People: {count} | Crowd: {label}",
                 (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                1,
+                0.9,
                 (255, 255, 255),
                 2,
             )
 
             out.write(output)
+            processed += 1
 
-            count_placeholder.metric("People Count", count)
-            badge_placeholder.markdown(
-                f"""
-                <div class="badge {badge}">
-                    {label}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
-
-                frame = preprocess_frame(
-                    frame,
-                    enable_preprocess,
-                    gamma_val,
-                    blur_k,
-                )
-
-                results = model.predict(
-                    frame,
-                    conf=conf_thres,
-                    iou=iou_thres,
-                    max_det=max_det,
-                    verbose=False,
-                )[0]
-
-                output, count = draw_boxes(frame.copy(), results, conf_thres)
-                label, badge = classify_crowd(count)
-
-                cv2.putText(
-                    output,
-                    f"People: {count} | Crowd: {label}",
-                    (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1,
-                    (255, 255, 255),
-                    2,
-                )
-
-                out.write(output)
-
-                current += 1
-                progress.progress(min(current / frame_count, 1.0))
+            progress.progress(min(frame_id / MAX_FRAMES, 1.0))
 
         cap.release()
         out.release()
         os.remove(tfile.name)
 
-        st.success("✅ Video processing complete!")
+        st.success("Video processed successfully!")
         st.video(out_path)
+
 
 # THEME STYLING
 if theme_mode == "Light":
