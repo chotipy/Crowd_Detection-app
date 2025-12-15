@@ -245,6 +245,9 @@ else:
         col1, col2 = st.columns([2, 1])
 
         with col1:
+            st.markdown("- Live Preview")
+            preview_image = st.empty()
+            st.markdown("- Processed Video")
             video_placeholder = st.empty()
 
         with col2:
@@ -261,6 +264,7 @@ else:
         total_people = 0
         frame_count = 0
         max_people = 0
+        last_frame = None
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -305,13 +309,14 @@ else:
             )
 
             out.write(output)
+            last_frame = output.copy()
 
             # Show current processed frame with boxes
-            video_placeholder.image(
+            preview_image.image(
                 output,
                 channels="BGR",
                 use_container_width=True,
-                caption=f"Processing... Frame {frame_id}",
+                caption=f"Frame {frame_id} - Detected {count} people",
             )
 
             # Update stats in real-time
@@ -319,13 +324,13 @@ else:
             live_max.metric("Peak Count", max_people)
             live_frames.metric("Frames Done", frame_count)
             live_crowd.markdown(
-                f'<div style="margin-top:0.5rem;"><strong>Crowd Level</strong><br><div class="badge {badge}" style="margin-top:0.2rem;">{label}</div></div>',
+                f'<div style="margin-top:1rem;"><strong>Crowd Level:</strong><br><div class="badge {badge}" style="margin-top:0.5rem;">{label}</div></div>',
                 unsafe_allow_html=True,
             )
 
             # Update progress
             progress_bar.progress(min(frame_id / MAX_FRAMES, 1.0))
-            status_text.text(f"⚙️ Processing frame {frame_id}/{MAX_FRAMES}")
+            status_text.text(f"Processing frame {frame_id}/{MAX_FRAMES}")
 
         cap.release()
         out.release()
@@ -339,12 +344,19 @@ else:
         status_text.empty()
         progress_bar.empty()
 
-        st.success("Video processed successfully! You can play it below.")
+        st.success("Video processed successfully!")
 
-        # Replace the image preview with video
-        with col1:
-            with open(out_path, "rb") as f:
-                video_placeholder.video(f.read())
+        # Keep the last frame preview and show video below it
+        if last_frame is not None:
+            preview_image.image(
+                last_frame,
+                channels="BGR",
+                use_container_width=True,
+                caption="Last processed frame",
+            )
+
+        with open(out_path, "rb") as f:
+            video_placeholder.video(f.read())
 
         # Update final stats
         with col2:
@@ -352,7 +364,7 @@ else:
             live_max.metric("Total Count", max_people)
             live_frames.metric("Total Frames", frame_count)
             live_crowd.markdown(
-                f'<div style="margin-top:0.5rem;"><strong>Average Crowd</strong><br><div class="badge {avg_badge}" style="margin-top:0.2rem;">{avg_label}</div></div>',
+                f'<div style="margin-top:1rem;"><strong>Average Crowd</strong><br><div class="badge {avg_badge}" style="margin-top:0.5rem;">{avg_label}</div></div>',
                 unsafe_allow_html=True,
             )
 
