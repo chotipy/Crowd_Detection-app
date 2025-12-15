@@ -190,7 +190,7 @@ if input_type == "Image":
         with col1:
             st.image(output, channels="BGR")
         with col2:
-            st.subheader("📊 Image Analysis")
+            st.header("📊 Image Analysis")
             st.metric("People Count", count)
             st.markdown(
                 f"""
@@ -430,7 +430,7 @@ st.markdown(
     }}
 
     section[data-testid="stSidebar"] h3 {{
-        font-size: 0.8em;
+        font-size: 0.7em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
