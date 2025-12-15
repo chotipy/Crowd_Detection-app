@@ -235,21 +235,20 @@ else:
 
         MAX_FRAMES = 200
         FRAME_SKIP = 4
-        PREVIEW_UPDATE_INTERVAL = 2  # Update preview every N processed frames
 
         out_path = "output_cloud.mp4"
         out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
         st.info("Processing video...")
 
-        # Create layout
+        # Create single layout
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            preview_placeholder = st.empty()
+            video_placeholder = st.empty()
 
         with col2:
-            st.markdown("### 📊 Live Stats")
+            st.markdown("📊 Video Analysis")
             live_count = st.empty()
             live_max = st.empty()
             live_frames = st.empty()
@@ -262,7 +261,6 @@ else:
         total_people = 0
         frame_count = 0
         max_people = 0
-        last_preview_frame = None
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -294,7 +292,7 @@ else:
             frame_count += 1
             max_people = max(max_people, count)
 
-            # Add info overlay
+            # Add info overlay to frame
             cv2.rectangle(output, (10, 5), (420, 55), (0, 0, 0), -1)
             cv2.putText(
                 output,
@@ -308,24 +306,22 @@ else:
 
             out.write(output)
 
-            # Update preview every N frames to reduce lag
-            if frame_count % PREVIEW_UPDATE_INTERVAL == 0:
-                last_preview_frame = output.copy()
-                preview_placeholder.image(
-                    last_preview_frame,
-                    channels="BGR",
-                    use_container_width=True,
-                    caption=f"Frame {frame_id} - Detecting...",
-                )
+            # Show current processed frame with boxes
+            video_placeholder.image(
+                output,
+                channels="BGR",
+                use_container_width=True,
+                caption=f"Processing... Frame {frame_id}",
+            )
 
-                # Update stats
-                live_count.metric("👥 Current Count", count)
-                live_max.metric("📈 Peak Count", max_people)
-                live_frames.metric("🎞️ Processed", frame_count)
-                live_crowd.markdown(
-                    f'<div style="margin-top:1rem;"><strong>Crowd Level:</strong><br><div class="badge {badge}" style="margin-top:0.5rem;">{label}</div></div>',
-                    unsafe_allow_html=True,
-                )
+            # Update stats in real-time
+            live_count.metric("Current Count", count)
+            live_max.metric("Peak Count", max_people)
+            live_frames.metric("Frames Done", frame_count)
+            live_crowd.markdown(
+                f'<div style="margin-top:0.5rem;"><strong>Crowd Level</strong><br><div class="badge {badge}" style="margin-top:0.2rem;">{label}</div></div>',
+                unsafe_allow_html=True,
+            )
 
             # Update progress
             progress_bar.progress(min(frame_id / MAX_FRAMES, 1.0))
@@ -339,29 +335,24 @@ else:
         avg_people = round(total_people / frame_count) if frame_count > 0 else 0
         avg_label, avg_badge = classify_crowd(avg_people)
 
-        # Clear processing UI
+        # Clear temporary UI
         status_text.empty()
-        preview_placeholder.empty()
+        progress_bar.empty()
 
-        st.success("Video processed successfully!")
+        st.success("Video processed successfully! You can play it below.")
 
-        st.markdown("---")
-
-        # Display final results
-        col1, col2 = st.columns([2, 1])
-
+        # Replace the image preview with video
         with col1:
-            st.subheader("Processed Video")
             with open(out_path, "rb") as f:
-                st.video(f.read())
+                video_placeholder.video(f.read())
 
+        # Update final stats
         with col2:
-            st.subheader("📊 Final Analysis")
-            st.metric("Average Count", avg_people)
-            st.metric("Total Count", max_people)
-            st.metric("Total Frames", frame_count)
-            st.markdown(
-                f'<div style="margin-top:1.5rem;"><strong>Average Crowd Level:</strong><br><div class="badge {avg_badge}" style="margin-top:0.5rem;">{avg_label}</div></div>',
+            live_count.metric("Average Count", avg_people)
+            live_max.metric("Total Count", max_people)
+            live_frames.metric("Total Frames", frame_count)
+            live_crowd.markdown(
+                f'<div style="margin-top:0.5rem;"><strong>Average Crowd</strong><br><div class="badge {avg_badge}" style="margin-top:0.2rem;">{avg_label}</div></div>',
                 unsafe_allow_html=True,
             )
 
