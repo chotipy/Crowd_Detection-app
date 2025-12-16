@@ -113,7 +113,7 @@ st.markdown(
     <th>People Count</th>
     <th>Crowd Label</th>
 </tr>
-<tr style="background-color:##5FAF8A;">
+<tr style="background-color:#5FAF8A;">
     <td>≤ 3</td>
     <td><b>FEW</b></td>
 </tr>
