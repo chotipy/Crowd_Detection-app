@@ -5,10 +5,10 @@
 This project implements a **complete crowd detection and crowd density classification system** using **YOLOv8** integrated into a **Streamlit web application**.
 The system detects people in **indoor CCTV images and short video footage**, counts the number of detected individuals, and classifies crowd density levels into **Low, Medium, and High**.
 
-🔗 **Live Demo (Streamlit):**  
+🔗 **Live Demo:**  
 👉 https://https://cctv-crowd-detection.streamlit.app
 
-###  1 Minute Demo Video
+‼️ **1 Minute Demo Video**
 A demonstration of the proposed system can be viewed at:  
 https://www.youtube.com/ADaMP5zTvqA
 
