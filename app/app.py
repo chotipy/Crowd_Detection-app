@@ -143,7 +143,7 @@ st.markdown(
 }
 
 .custom-table th {
-    background-color: {bg_color};
+    background-color: {card_bg};
 }
 </style>
 """,
@@ -656,4 +656,23 @@ st.markdown(
 
 # FOOTER
 st.markdown("---")
+
+
+def github_footer(url, repo_name):
+    st.markdown(
+        f"""
+        <hr>
+        <div style="text-align:center; color:gray;">
+            Check out the full documentation 👉🏻
+            <a href="{url}" target="_blank" style="color:#0366d6;">
+                {repo_name} on GitHub
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+github_footer("https://github.com/chotipy/Crowd_Detection-app", "Crowd Detection App")
+
 st.caption("Final Project – Deep Learning | YOLOv8 Crowd Detection | BINUS University")
