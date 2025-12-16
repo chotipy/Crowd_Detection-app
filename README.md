@@ -9,7 +9,6 @@ The system detects people in **indoor CCTV images and short video footage**, cou
 👉 https://https://cctv-crowd-detection.streamlit.app
 
 ‼️ **1 Minute Demo Video**
-A demonstration of the proposed system can be viewed at:
 👉 https://www.youtube.com/ADaMP5zTvqA
 
 ---
