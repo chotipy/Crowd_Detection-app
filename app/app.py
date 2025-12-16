@@ -143,7 +143,7 @@ st.markdown(
 }
 
 .custom-table th {
-    background-color: {accent_color};
+    background-color: {text_secondary};
 }
 </style>
 """,
