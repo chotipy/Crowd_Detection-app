@@ -143,7 +143,7 @@ st.markdown(
 }
 
 .custom-table th {
-    background-color: {sidebar_bg};
+    background-color: {shadow};
 }
 </style>
 """,
