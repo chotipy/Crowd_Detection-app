@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (kalau mau di-push, JANGAN masukin ini)
+# data/raw/
+# data/processed/
+
+

@@ -1,0 +1,9 @@
+
+path: /content/drive/MyDrive/PYTHON5/mall_dataset/mall_dataset/yolo_mall
+
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: person
